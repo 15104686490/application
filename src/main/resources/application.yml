@@ -1,0 +1,12 @@
+server:
+  port: 8088
+file:
+  path: D:\upload\
+access:
+  path: D:\upload\
+
+spring:
+  servlet:
+    multipart:
+      max-file-size: 1024MB
+      max-request-size: 1024MB
