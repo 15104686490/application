@@ -34,10 +34,8 @@ public class DocTest {
                     XWPFRun run = xp.createRun();
                     // xwpfRun.setUnderline(UnderlinePatterns.WAVY_HEAVY);
                     // xwpfRun.setUnderlineColor("FF0000");
-
                     run.setBold(true); //加粗
                     run.setColor("FF0000");
-
                     CTRPr rpr = run.getCTR().isSetRPr() ? run.getCTR().getRPr() : run.getCTR().addNewRPr();
 
                 } else {

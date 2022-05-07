@@ -6,14 +6,20 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 public class PatternUtil {
+    /**
+     * 正则匹配方法（固定正则表达式）
+     * @param text
+     * @return
+     */
     public static List<String> getPatternStringList(String text) {
         List<String> result = new ArrayList<>();
         if (text == null || text.length() == 0) {
             // System.out.println("text is null!!!");
             return result;
         }
-
-        Pattern patten = Pattern.compile("《.*(.*)》.*(.*)");//编译正则表达式
+        String regx = ConfigTest.getConfig("regx");
+        // Pattern patten = Pattern.compile("《.*(.*)》.*(.*)");//编译正则表达式
+        Pattern patten = Pattern.compile(regx);//编译正则表达式
         Matcher matcher = patten.matcher(text);// 指定要匹配的字符串
 
         // List<String> matchStrs = new ArrayList<>();
@@ -29,6 +35,12 @@ public class PatternUtil {
         return result;
     }
 
+    /**
+     * 传入正则表达式
+     * @param text
+     * @param regex
+     * @return
+     */
     public static List<String> getPatternStringList(String text, String regex) {
         List<String> result = new ArrayList<>();
         if (text == null || text.length() == 0) {
@@ -46,6 +58,11 @@ public class PatternUtil {
         return result;
     }
 
+    /**
+     * 支持从配置中心等位置获取正则表达式并进行匹配
+     * @param text
+     * @return
+     */
     public static List<String> getPatternStringListWithConfigRules(String text){
         return null;
     }
