@@ -7,10 +7,11 @@ import java.util.regex.Pattern;
 
 public class PatternUtil {
     /**
-     * 正则匹配方法（固定正则表达式）
+     * 正则匹配方法（固定正则表达式）,从配置中心获取正则表达式,
      * @param text
      * @return
      */
+    @Deprecated
     public static List<String> getPatternStringList(String text) {
         List<String> result = new ArrayList<>();
         if (text == null || text.length() == 0) {
@@ -35,6 +36,9 @@ public class PatternUtil {
         return result;
     }
 
+
+
+
     /**
      * 传入正则表达式
      * @param text
@@ -47,14 +51,12 @@ public class PatternUtil {
             // System.out.println("text is null!!!");
             return result;
         }
-
         Pattern patten = Pattern.compile(regex);//编译正则表达式
         Matcher matcher = patten.matcher(text);// 指定要匹配的字符串
 
         while (matcher.find()) { //此处find（）每次被调用后，会偏移到下一个匹配
             result.add(matcher.group());//获取当前匹配的值
         }
-
         return result;
     }
 
