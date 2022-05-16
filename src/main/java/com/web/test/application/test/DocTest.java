@@ -9,6 +9,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
 
 public class DocTest {
 
@@ -18,6 +19,7 @@ public class DocTest {
      */
     public static void main(String[] args) {
         try {
+
             // 2007及以后的版本
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage("C:\\Users\\dell\\IdeaProjects\\doc-test\\doc-test\\src\\main\\java\\test\\test2.docx"));
@@ -71,6 +73,7 @@ public class DocTest {
             doc.write(stream);
             stream.close();
             System.out.println("job is done !!!");
+
            /* XWPFComment[] xwpfComment = doc.getComments();
             for (XWPFComment x : xwpfComment) {
                 System.out.println(x.getId());
@@ -81,6 +84,7 @@ public class DocTest {
 
             //System.out.println("start");
             //System.out.println(str);
+
 
         } catch (IOException e) {
             e.printStackTrace();

@@ -52,12 +52,12 @@ public class FileServiceImpl implements FileService {
         file.setPath(folder);
         file.setOldName(originFileName);
         log.error(FILE_PATH);
-        try {
+        /*try {
             Method[] methods = Class.forName("").getMethods();
             methods[0].isAnnotationPresent(Autowired.class);
         } catch (ClassNotFoundException e) {
             e.printStackTrace();
-        }
+        }*/
         /*log.error(generateFileName(folder, fileName));
         baseMapper.insert(file);
         FileVO result = BeanUtil.toBean(file, FileVO.class);
