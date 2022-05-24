@@ -19,7 +19,6 @@ public class DocTest {
      */
     public static void main(String[] args) {
         try {
-
             // 2007及以后的版本
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage("C:\\Users\\dell\\IdeaProjects\\doc-test\\doc-test\\src\\main\\java\\test\\test2.docx"));
@@ -28,9 +27,11 @@ public class DocTest {
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             System.out.println(paragraph.size());
             doc.getCharts();
+            String regx = ConfigTest.getConfig("regx");
             for (XWPFParagraph xp : paragraph) {
                 // System.out.println(xp.getText());
-                List<String> strs = PatternUtil.getPatternStringList(xp.getText());
+                // List<String> strs = PatternUtil.getPatternStringList(xp.getText());
+                List<String> strs = PatternUtil.getPatternStringList(xp.getText(), regx);
                 if (strs.size() > 0) {
                     // xp.setBorderBottom(Borders.WAVELINE);
                     XWPFRun run = xp.createRun();
@@ -48,8 +49,6 @@ public class DocTest {
                 }
                 // xp.getCTP().addNewR().addNewCommentReference().setId(1);
             }
-
-
             /*
             word文档中表格中文本的处理逻辑(tables)
             问题：
@@ -73,19 +72,14 @@ public class DocTest {
             doc.write(stream);
             stream.close();
             System.out.println("job is done !!!");
-
            /* XWPFComment[] xwpfComment = doc.getComments();
             for (XWPFComment x : xwpfComment) {
                 System.out.println(x.getId());
                 System.out.println(x.getDate());
                 System.out.println(x.getText());
             }*/
-
-
             //System.out.println("start");
             //System.out.println(str);
-
-
         } catch (IOException e) {
             e.printStackTrace();
         }

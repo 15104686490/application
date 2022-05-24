@@ -24,22 +24,18 @@ public class NewVersionDocServiceImpl implements DocService {
         List<String> result = new ArrayList();
         String regx = ConfigTest.getConfig("regx");
         try {
-            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
+            /*XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage("C:\\Users\\dell\\IdeaProjects\\doc-test\\doc-test\\src\\main\\java\\test\\test2.docx"));
-            // String str = docx.getText();
+           */
+            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
+                    .openPackage(path));
             XWPFDocument doc = docx.getDocument();
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             System.out.println(paragraph.size());
             doc.getCharts();
             for (XWPFParagraph xp : paragraph) {
                 List<String> strs = PatternUtil.getPatternStringList(xp.getText(), regx);
-                /*if (strs.size() > 0) {
-
-                } else {
-                    continue;
-                }*/
                 for (String str1 : strs) {
-                    // System.out.println(str1);
                     result.add(str1);
                 }
             }

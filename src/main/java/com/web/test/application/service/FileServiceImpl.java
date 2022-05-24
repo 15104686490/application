@@ -1,7 +1,9 @@
 package com.web.test.application.service;
 
+import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.model.FileVO;
 import com.web.test.application.model.UpFile;
+import com.web.test.application.test.ConfigTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +37,8 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public FileVO storeFile(byte[] content, String originFileName) {
+        //临时文件路径配置
+        String tempFilePathConfig = ConfigUtil.getStringConfig("tempFilePath");
         // 获取文件后缀 生成目录路径
         // 配置文件里的file.path + yyyyMMdd 格式组成文件夹路径
         String folder = LocalDateTime.now().format(dateTimeFormatter);
