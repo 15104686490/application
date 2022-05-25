@@ -30,7 +30,7 @@ public abstract class ESBaseDao {
         return client;
     }
 
-    public static List<AnalyzeResponse.AnalyzeToken> getAnalyzeResult(AnalyzeRequest request, RequestOptions requestOptions){
+    public static List<AnalyzeResponse.AnalyzeToken> getAnalyzeResult(AnalyzeRequest request, RequestOptions requestOptions) {
         try {
             AnalyzeResponse analyzeResponse = client.indices().analyze(request, requestOptions);
             return analyzeResponse.getTokens();

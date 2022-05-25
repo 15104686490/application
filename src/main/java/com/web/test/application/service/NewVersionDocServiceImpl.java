@@ -29,6 +29,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
     /**
      * 获取docx中的正文内容，不包含tables
+     *
      * @param path
      * @return
      */
@@ -65,6 +66,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
     /**
      * 检查docx文件中的有效性
+     *
      * @param oldPath
      * @param newPath
      * @return
@@ -83,20 +85,36 @@ public class NewVersionDocServiceImpl implements DocService {
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             for (XWPFParagraph xp : paragraph) {
                 XWPFRun newRun = xp.createRun();
+                int i = 1;
                 String text = xp.getText().replaceAll(" ", "");
                 text = text.replaceAll("《", "");
                 text = text.replaceAll("》", "");
                 text = text.replaceAll("（", "");
                 text = text.replaceAll("）", "");
                 List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
+                int j = 0;
                 for (String words : analysisResults) {
                     if (dictionaryConfigs.contains(words)) {
                         newRun.setBold(true);
                         newRun.setColor("FF0000");
-                        newRun.setText(words);
+
+                        if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
+                            newRun.setText(i + ". " + words + analysisResults.get(j + 1));
+                        } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
+                            continue;
+                        } else {
+                            newRun.setText(i + ". " + words);
+                        }
+
+                        /*if ((j - 1) > 0 && dictionaryConfigs.contains( analysisResults.get(j - 1) + words)) {
+                            // newRun.setText(i + ". " + words + analysisResults.get(j + 1));
+                            continue;
+                        }*/
                         newRun.addBreak();
                         log.error(words);
+                        i++;
                     }
+                    j++;
                 }
             }
             List<XWPFTable> charts = doc.getTables();
@@ -108,6 +126,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
                         for (XWPFParagraph xp : cellParagraphs) {
                             XWPFRun newRun = xp.createRun();
+                            int i = 1;
                             String text = xp.getText().replaceAll(" ", "");
                             text = text.replaceAll("《", "");
                             text = text.replaceAll("》", "");
@@ -115,13 +134,24 @@ public class NewVersionDocServiceImpl implements DocService {
                             text = text.replaceAll("）", "");
                             List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
                             // log.error(text);
+                            int j = 0;
                             for (String words : analysisResults) {
                                 if (dictionaryConfigs.contains(words)) {
                                     newRun.setBold(true);
                                     newRun.setColor("FF0000");
-                                    newRun.setText(words);
+                                    // newRun.setText(i + ". " + words);
+
+                                    if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
+                                        newRun.setText(i + ". " + words + analysisResults.get(j + 1));
+                                    } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
+                                        continue;
+                                    } else {
+                                        newRun.setText(i + ". " + words);
+                                    }
+
                                     newRun.addBreak();
                                     log.error(words);
+                                    i++;
                                 }
                             }
                         }
