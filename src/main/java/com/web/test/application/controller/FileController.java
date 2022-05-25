@@ -8,8 +8,12 @@ import com.web.test.application.test.ResultTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 // import org.apache.poi.ss.formula.functions.T;
+import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.core.io.InputStreamResource;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -17,11 +21,11 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
+import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 
 /**
  * 文件处理 controller
@@ -36,17 +40,18 @@ public class FileController {
     @Autowired
     private NewVersionDocServiceImpl newVersionDocService;
 
+    @Value("${file.path}")
+    private String FILE_PATH;
+
     /**
      * 单个文件上传接口
-     *
      * @param file
-     * @param userID
+     * @param appName
      * @return
      */
-    @PostMapping("/uploadByOne")
-    public ResultTest uploadByOne(@RequestParam("file") MultipartFile file,
-                                  @RequestParam("userID") String userID,
-                                  @RequestParam("appName") String appName) {
+    @PostMapping(value = "/uploadByOne", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity<byte[]> uploadByOne(@RequestParam("file") MultipartFile file,
+                                              @RequestParam("appName") String appName) {
         if (!ConfigUtil.getStringConfigList("whiteList").contains(appName)) {
             log.error(appName + "为未授权服务");
             return null;
@@ -56,33 +61,39 @@ public class FileController {
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             IOUtils.copy(is, os);
             byte[] bytes = os.toByteArray();
-            // log.error(file.getName()); //字段名称
             log.error(file.getOriginalFilename()); //原始文件名称  包括后缀
-            // log.error(file.getSize() + "");
             String originalFilename = file.getOriginalFilename();
-
-            /*String fileName = DigestUtils.md5Hex(userID + originalFilename)
-                    + originalFilename.substring(originalFilename.lastIndexOf(".")); // 生成磁盘保存的名称 userName 原始名称 后缀
-            log.error(fileName);*/
-
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
-
-
-            //检查上传文件是否已存在（待补充）
-            FileVO vo = fileService.storeFile(bytes, tempFileName);
-            String str = "";
-
-            str.hashCode();
-            ArrayList arrayList = new ArrayList();
-            arrayList.add(new Object());
-            HashMap hashMap = new HashMap();
-
-            return new ResultTest(vo.toString(), 200, "上传成功"); // vo.toString();
-        } catch (IOException e) {
-            /*e.printStackTrace();*/
-            log.error(e.getMessage());
-            return new ResultTest(null, 500, "文件上传异常"); // "文件上传异常";
+            log.error("tempFileName   " + tempFileName);
+            String deleteFileName = fileService.storeFile(bytes, tempFileName);
+            String suffix = originalFilename.split("\\.")[1];
+            log.error(originalFilename);
+            if (!suffix.equals("docx")) {
+                log.error("上传文件格式异常，非docx格式");
+                return null;
+            }
+            String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
+            File tempFile = new File(tempFilePath);
+            newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath);
+            File downloadFile = new File(tempFilePath);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentDispositionFormData("attachment",
+                    new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            byte[] content = FileUtils.readFileToByteArray(downloadFile);
+            //清除临时文件
+            log.error(deleteFileName);
+            File deleteFile = new File(FILE_PATH + deleteFileName);
+            deleteFile.delete();
+            tempFile.delete();
+            //downloadFile.delete();
+            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            log.error("上传文件处理异常：" + e.getStackTrace());
+            e.printStackTrace();
+            return null;
         }
     }
 
@@ -91,19 +102,32 @@ public class FileController {
      * @param fileName
      * @param userID
      * @return
+     * 测试下载文件
      */
-    @PostMapping(value = "/downloadFile", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @GetMapping(value = "/downloadFile", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<byte[]> download(@RequestParam String fileName,
                                            @RequestParam String userID) {
         /*通过fileName和userName查询MySQL file_info表判断文件是否存在*/
-        boolean flag = false;
-        if (true) {
-            log.error(userID + "请求的文件" + fileName + "不存在");
-            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
-        } else {
-
+        try {
+            boolean flag = false;
+            if (flag) {
+                log.error(userID + "请求的文件" + fileName + "不存在");
+                return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+            } else {
+                File file = new File("D://11.jpg");
+                HttpHeaders headers = new HttpHeaders();
+                headers.setContentDispositionFormData("attachment",
+                        new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
+                headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+                headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+                byte[] content = FileUtils.readFileToByteArray(file);
+                return new ResponseEntity<>(content, headers, HttpStatus.OK);
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+            return null;
         }
-        return null;
+        // return null;
     }
 
     /**

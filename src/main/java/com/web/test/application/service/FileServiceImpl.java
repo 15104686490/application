@@ -36,16 +36,16 @@ public class FileServiceImpl implements FileService {
     }
 
     @Override
-    public FileVO storeFile(byte[] content, String originFileName) {
+    public String storeFile(byte[] content, String originFileName) {
         //临时文件路径配置
         String tempFilePathConfig = ConfigUtil.getStringConfig("tempFilePath");
         // 获取文件后缀 生成目录路径
         // 配置文件里的file.path + yyyyMMdd 格式组成文件夹路径
         String folder = LocalDateTime.now().format(dateTimeFormatter);
         String suffix = originFileName.substring(originFileName.lastIndexOf(".")),
-                filePath = FILE_PATH + folder + java.io.File.separatorChar;
+                filePath = FILE_PATH;
         // 保存文件并返回文件名
-        String fileName = this.storeFile(content, filePath, suffix);
+        String fileName = this.storeFile(content, filePath, suffix, originFileName);
         Object o = new Object();
         o.hashCode();
         Integer integer = Integer.valueOf(1);
@@ -55,7 +55,7 @@ public class FileServiceImpl implements FileService {
         file.setSuffix(suffix);
         file.setPath(folder);
         file.setOldName(originFileName);
-        log.error(FILE_PATH);
+        // log.error(FILE_PATH);
         /*try {
             Method[] methods = Class.forName("").getMethods();
             methods[0].isAnnotationPresent(Autowired.class);
@@ -67,7 +67,7 @@ public class FileServiceImpl implements FileService {
         FileVO result = BeanUtil.toBean(file, FileVO.class);
         result.setUrl(genAccessUrl(folder, fileName));
         result.setId(file.getId());*/
-        return new FileVO();
+        return fileName;
     }
 
 
@@ -87,8 +87,9 @@ public class FileServiceImpl implements FileService {
     }
 
 
-    private String storeFile(byte[] content, String path, String suffix) {
-        String fileName = generateFileName(suffix);
+    private String storeFile(byte[] content, String path, String suffix, String name) {
+        // String fileName = generateFileName(suffix);
+        String fileName = name;
         storeFileWithFileName(content, path, fileName);
         return fileName;
     }

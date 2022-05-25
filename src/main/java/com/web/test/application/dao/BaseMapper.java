@@ -1,16 +1,16 @@
 package com.web.test.application.dao;
 
 
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
+// import org.apache.ibatis.annotations.Mapper;
+// import org.apache.ibatis.annotations.Select;
 
 import java.util.List;
 
 /**
  *
  */
-@Mapper
+// @Mapper
 public interface BaseMapper {
-    @Select("")
+    // @Select("")
     public List<Object> queryFilesList();
 }

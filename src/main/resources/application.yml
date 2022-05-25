@@ -1,9 +1,9 @@
 server:
   port: 8088
 file:
-  path: D:\upload\
+  path: C:\upload\
 access:
-  path: D:\upload\
+  path: C:\upload\
 
 spring:
   servlet:
