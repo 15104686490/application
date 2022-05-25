@@ -46,16 +46,16 @@ public class FileController {
     /**
      * 单个文件上传接口
      * @param file
-     * @param appName
      * @return
      */
     @PostMapping(value = "/uploadByOne", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<byte[]> uploadByOne(@RequestParam("file") MultipartFile file,
-                                              @RequestParam("appName") String appName) {
-        if (!ConfigUtil.getStringConfigList("whiteList").contains(appName)) {
+    public ResponseEntity<byte[]> uploadByOne(@RequestParam("file") MultipartFile file) {
+        // @RequestParam("appName") String appName
+        //接口权限白名单检查
+        /*if (!ConfigUtil.getStringConfigList("whiteList").contains(appName)) {
             log.error(appName + "为未授权服务");
             return null;
-        }
+        }*/
         try {
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
