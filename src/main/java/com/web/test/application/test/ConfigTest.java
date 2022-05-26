@@ -15,6 +15,7 @@ public class ConfigTest {
 
     static {
         Properties properties = new Properties();
+        //nocas 配置中心地址
         properties.setProperty(PropertyKeyConst.SERVER_ADDR, "localhost:8848");
         try {
             configService = NacosFactory.createConfigService(properties);
