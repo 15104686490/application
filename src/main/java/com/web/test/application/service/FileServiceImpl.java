@@ -21,11 +21,11 @@ import java.time.format.DateTimeFormatter;
 @Slf4j
 @Service
 public class FileServiceImpl implements FileService {
-    @Value("${file.path}")
+    // @Value("${file.path}")
     private String FILE_PATH;
 
-    @Value("${access.path}")
-    private String Access_BASE_URL;
+    /*@Value("${access.path}")
+    private String Access_BASE_URL;*/
 
     private DateTimeFormatter dateTimeFormatter = DateTimeFormatter.ofPattern("yyyyMMdd");
 
@@ -37,6 +37,7 @@ public class FileServiceImpl implements FileService {
 
     @Override
     public String storeFile(byte[] content, String originFileName) {
+        FILE_PATH = ConfigUtil.getStringConfig("file_path");
         //临时文件路径配置
         String tempFilePathConfig = ConfigUtil.getStringConfig("tempFilePath");
         // 获取文件后缀 生成目录路径

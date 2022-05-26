@@ -1,6 +1,7 @@
 package com.web.test.application.controller;
 
 
+import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
 import lombok.extern.slf4j.Slf4j;
@@ -32,7 +33,7 @@ public class FileController {
     @Autowired
     private NewVersionDocServiceImpl newVersionDocService;
 
-    @Value("${file.path}")
+    // @Value("${file.path}")
     private String FILE_PATH;
 
     /**
@@ -49,6 +50,7 @@ public class FileController {
             return null;
         }*/
         try {
+            FILE_PATH = ConfigUtil.getStringConfig("file_path");
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             IOUtils.copy(is, os);
