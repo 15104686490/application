@@ -13,6 +13,9 @@ import org.elasticsearch.client.indices.AnalyzeResponse;
 import java.io.IOException;
 import java.util.List;
 
+/**
+ *
+ */
 @Slf4j
 public abstract class ESBaseDao {
     static RestHighLevelClient client;
@@ -26,10 +29,18 @@ public abstract class ESBaseDao {
                 new HttpHost(host, standbyPort, "http")));
     }
 
+    /**
+     * @return
+     */
     public static RestHighLevelClient getSimpleESClient() {
         return client;
     }
 
+    /**
+     * @param request
+     * @param requestOptions
+     * @return
+     */
     public static List<AnalyzeResponse.AnalyzeToken> getAnalyzeResult(AnalyzeRequest request, RequestOptions requestOptions) {
         try {
             AnalyzeResponse analyzeResponse = client.indices().analyze(request, requestOptions);

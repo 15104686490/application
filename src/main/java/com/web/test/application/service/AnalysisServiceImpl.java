@@ -7,6 +7,9 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 public class AnalysisServiceImpl implements AnalysisService {
@@ -14,6 +17,10 @@ public class AnalysisServiceImpl implements AnalysisService {
     @Autowired
     ESAnalyzeDao esAnalyzeDao;
 
+    /**
+     * @param text
+     * @return
+     */
     @Override
     public List<String> getIkSmartAnalysisWords(String text) {
         return esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);

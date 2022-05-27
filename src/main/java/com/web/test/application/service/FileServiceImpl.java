@@ -18,6 +18,9 @@ import java.lang.reflect.Method;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 
+/**
+ *
+ */
 @Slf4j
 @Service
 public class FileServiceImpl implements FileService {
@@ -35,6 +38,11 @@ public class FileServiceImpl implements FileService {
         return null;
     }
 
+    /**
+     * @param content
+     * @param originFileName
+     * @return
+     */
     @Override
     public String storeFile(byte[] content, String originFileName) {
         FILE_PATH = ConfigUtil.getStringConfig("file_path");
@@ -72,6 +80,11 @@ public class FileServiceImpl implements FileService {
     }
 
 
+    /**
+     * @param content
+     * @param path
+     * @param fileName
+     */
     @Override
     public void storeFileWithFileName(byte[] content, String path, String fileName) {
         // 目录不存在则创建
@@ -88,6 +101,13 @@ public class FileServiceImpl implements FileService {
     }
 
 
+    /**
+     * @param content
+     * @param path
+     * @param suffix
+     * @param name
+     * @return
+     */
     private String storeFile(byte[] content, String path, String suffix, String name) {
         // String fileName = generateFileName(suffix);
         String fileName = name;
