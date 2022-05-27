@@ -15,6 +15,7 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
 
@@ -73,10 +74,11 @@ public class NewVersionDocServiceImpl implements DocService {
      */
     @Override
     public String checkRuluesOfText(String oldPath, String newPath) {
-        log.error(oldPath);
-        log.error(newPath);
+        // log.error(oldPath);
+        // log.error(newPath);
         HashSet dictionaryConfigs = new HashSet();
         dictionaryConfigs.addAll(ConfigUtil.getStringConfigList("dictionary_words"));
+        List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
         // String regx = ConfigTest.getConfig("regx");
         try {
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
@@ -86,18 +88,13 @@ public class NewVersionDocServiceImpl implements DocService {
             for (XWPFParagraph xp : paragraph) {
                 XWPFRun newRun = xp.createRun();
                 int i = 1;
-                String text = xp.getText().replaceAll(" ", "");
-                text = text.replaceAll("《", "");
-                text = text.replaceAll("》", "");
-                text = text.replaceAll("（", "");
-                text = text.replaceAll("）", "");
+                String text = replaceSpecialSymbol(xp.getText(), symbols, "");
                 List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
                 int j = 0;
                 for (String words : analysisResults) {
                     if (dictionaryConfigs.contains(words)) {
                         newRun.setBold(true);
                         newRun.setColor("FF0000");
-
                         if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
                             newRun.setText(i + ". " + words + analysisResults.get(j + 1));
                         } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
@@ -127,11 +124,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         for (XWPFParagraph xp : cellParagraphs) {
                             XWPFRun newRun = xp.createRun();
                             int i = 1;
-                            String text = xp.getText().replaceAll(" ", "");
-                            text = text.replaceAll("《", "");
-                            text = text.replaceAll("》", "");
-                            text = text.replaceAll("（", "");
-                            text = text.replaceAll("）", "");
+                            String text = replaceSpecialSymbol(xp.getText(), symbols, "");
                             List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
                             // log.error(text);
                             int j = 0;
@@ -140,7 +133,6 @@ public class NewVersionDocServiceImpl implements DocService {
                                     newRun.setBold(true);
                                     newRun.setColor("FF0000");
                                     // newRun.setText(i + ". " + words);
-
                                     if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
                                         newRun.setText(i + ". " + words + analysisResults.get(j + 1));
                                     } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
@@ -169,5 +161,18 @@ public class NewVersionDocServiceImpl implements DocService {
             e.printStackTrace();
         }
         return null;
+    }
+
+    private String replaceSpecialSymbol(String text, List<String> symbols, String replaceString) {
+        if (text == null || text.length() == 0) {
+            return text;
+        }
+        if (symbols.size() == 0) {
+            return text;
+        }
+        for (String symbol : symbols) {
+            text = text.replaceAll(symbol, replaceString);
+        }
+        return text;
     }
 }

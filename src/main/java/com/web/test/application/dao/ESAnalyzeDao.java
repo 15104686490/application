@@ -22,6 +22,7 @@ public class ESAnalyzeDao extends ESBaseDao {
      */
     public List<String> getOriginalIKSmartAnalysisWords(String text) {
         try {
+            //此方法使用IK分词器中的ik_smart模式，按词典中的粗粒度进行分词
             ArrayList<String> result = new ArrayList<>();
             AnalyzeRequest request = AnalyzeRequest.buildCustomAnalyzer("ik_smart")
                     .build(text);

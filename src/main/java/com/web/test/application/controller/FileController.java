@@ -38,6 +38,7 @@ public class FileController {
 
     /**
      * 单个文件上传接口
+     *
      * @param file
      * @return
      */
@@ -59,10 +60,10 @@ public class FileController {
             String originalFilename = file.getOriginalFilename();
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
-            log.error("tempFileName   " + tempFileName);
+            //log.error("tempFileName   " + tempFileName);
             String deleteFileName = fileService.storeFile(bytes, tempFileName);
             String suffix = originalFilename.split("\\.")[1];
-            log.error(originalFilename);
+            //log.error(originalFilename);
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
                 return null;
@@ -77,8 +78,9 @@ public class FileController {
             headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
             byte[] content = FileUtils.readFileToByteArray(downloadFile);
+
             //清除临时文件
-            log.error(deleteFileName);
+            //log.error(deleteFileName);
             File deleteFile = new File(FILE_PATH + deleteFileName);
             deleteFile.delete();
             tempFile.delete();
@@ -95,8 +97,7 @@ public class FileController {
     /**
      * @param fileName
      * @param userID
-     * @return
-     * 测试下载文件
+     * @return 测试下载文件
      */
     @GetMapping(value = "/downloadFile", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<byte[]> download(@RequestParam String fileName,
