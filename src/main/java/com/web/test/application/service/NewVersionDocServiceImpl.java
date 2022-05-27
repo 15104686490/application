@@ -163,6 +163,13 @@ public class NewVersionDocServiceImpl implements DocService {
         return null;
     }
 
+    /**
+     * 替换文本中的特殊符号
+     * @param text
+     * @param symbols
+     * @param replaceString
+     * @return
+     */
     private String replaceSpecialSymbol(String text, List<String> symbols, String replaceString) {
         if (text == null || text.length() == 0) {
             return text;
