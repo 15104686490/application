@@ -8,8 +8,9 @@ import com.alibaba.nacos.api.exception.NacosException;
 import java.util.Properties;
 
 /**
- * 测试从nacos获取配置
+ * 从nacos获取配置（测试）
  */
+@Deprecated
 public class ConfigTest {
     /*static ConfigService configService;
 
