@@ -1,5 +1,6 @@
 package com.web.test.application.test;
 
+import com.web.test.application.config.NacosUtil;
 import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
@@ -27,7 +28,7 @@ public class DocTest {
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             System.out.println(paragraph.size());
             doc.getCharts();
-            String regx = ConfigTest.getConfig("regx");
+            String regx = NacosUtil.getConfig("regx");
             for (XWPFParagraph xp : paragraph) {
                 // System.out.println(xp.getText());
                 // List<String> strs = PatternUtil.getPatternStringList(xp.getText());

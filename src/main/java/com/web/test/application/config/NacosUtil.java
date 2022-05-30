@@ -1,4 +1,4 @@
-package com.web.test.application.test;
+package com.web.test.application.config;
 
 import com.alibaba.nacos.api.NacosFactory;
 import com.alibaba.nacos.api.PropertyKeyConst;
@@ -7,11 +7,8 @@ import com.alibaba.nacos.api.exception.NacosException;
 
 import java.util.Properties;
 
-/**
- * 测试从nacos获取配置
- */
-public class ConfigTest {
-    /*static ConfigService configService;
+public class NacosUtil {
+    static ConfigService configService;
 
     static {
         Properties properties = new Properties();
@@ -24,7 +21,8 @@ public class ConfigTest {
         }
     }
 
-    private static String getConfig(String configName) {
+
+    public static String getConfig(String configName) {
         try {
             long start = System.currentTimeMillis();
             String config = configService.getConfig(configName, "DEFAULT_GROUP", 5000);
@@ -35,17 +33,4 @@ public class ConfigTest {
             return null;
         }
     }
-
-    public static void main(String[] args) {
-        for (int i = 0; i <= 10; i++) {
-            long start = System.currentTimeMillis();
-            System.out.println(getConfig("test"));
-            System.out.println("cost of get config :" + (System.currentTimeMillis() - start));
-            try {
-                Thread.sleep(2000);
-            } catch (InterruptedException e) {
-                e.printStackTrace();
-            }
-        }
-    }*/
 }

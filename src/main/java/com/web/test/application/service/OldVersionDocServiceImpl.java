@@ -15,6 +15,7 @@ import java.util.List;
 /**
  * 支持07前的版本
  */
+@Deprecated
 @Slf4j
 @Service
 public class OldVersionDocServiceImpl implements DocService {

@@ -3,7 +3,6 @@ package com.web.test.application.service;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.model.FileVO;
 import com.web.test.application.model.UpFile;
-import com.web.test.application.test.ConfigTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;

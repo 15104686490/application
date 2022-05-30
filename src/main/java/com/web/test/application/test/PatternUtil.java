@@ -1,5 +1,7 @@
 package com.web.test.application.test;
 
+import com.web.test.application.config.NacosUtil;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.regex.Matcher;
@@ -18,7 +20,7 @@ public class PatternUtil {
             // System.out.println("text is null!!!");
             return result;
         }
-        String regx = ConfigTest.getConfig("regx");
+        String regx = NacosUtil.getConfig("regx");
         // Pattern patten = Pattern.compile("《.*(.*)》.*(.*)");//编译正则表达式
         Pattern patten = Pattern.compile(regx);//编译正则表达式
         Matcher matcher = patten.matcher(text);// 指定要匹配的字符串

@@ -1,8 +1,9 @@
 package com.web.test.application.service;
 
 import com.web.test.application.config.ConfigUtil;
+import com.web.test.application.config.NacosUtil;
 import com.web.test.application.dao.ESAnalyzeDao;
-import com.web.test.application.test.ConfigTest;
+
 import com.web.test.application.test.PatternUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ooxml.POIXMLDocument;
@@ -20,7 +21,7 @@ import java.util.HashSet;
 import java.util.List;
 
 /**
- * 支持07后的版本 word
+ * 支持07后的版本 word docx后缀
  */
 @Slf4j
 @Service
@@ -37,7 +38,7 @@ public class NewVersionDocServiceImpl implements DocService {
     @Override
     public List<String> getText(String path) {
         List<String> result = new ArrayList();
-        String regx = ConfigTest.getConfig("regx");
+        String regx = NacosUtil.getConfig("regx");
         try {
             /*XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage("C:\\Users\\dell\\IdeaProjects\\doc-test\\doc-test\\src\\main\\java\\test\\test2.docx"));
@@ -79,7 +80,7 @@ public class NewVersionDocServiceImpl implements DocService {
         HashSet dictionaryConfigs = new HashSet();
         dictionaryConfigs.addAll(ConfigUtil.getStringConfigList("dictionary_words"));
         List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
-        // String regx = ConfigTest.getConfig("regx");
+
         try {
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage(oldPath));
@@ -103,10 +104,6 @@ public class NewVersionDocServiceImpl implements DocService {
                             newRun.setText(i + ". " + words);
                         }
 
-                        /*if ((j - 1) > 0 && dictionaryConfigs.contains( analysisResults.get(j - 1) + words)) {
-                            // newRun.setText(i + ". " + words + analysisResults.get(j + 1));
-                            continue;
-                        }*/
                         newRun.addBreak();
                         log.error(words);
                         i++;
