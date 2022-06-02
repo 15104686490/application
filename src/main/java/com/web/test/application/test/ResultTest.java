@@ -18,7 +18,7 @@ public class ResultTest<T> {
 
     int code;
 
-    String meg;
+    String msg;
 
     /*public static ResultTest buildSuccessResult(T value,int code, String st){
         return new ResultTest(r);

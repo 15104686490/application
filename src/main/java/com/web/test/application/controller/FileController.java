@@ -4,6 +4,7 @@ package com.web.test.application.controller;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
+import com.web.test.application.test.ResultTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -42,8 +43,9 @@ public class FileController {
      * @param file
      * @return
      */
-    @PostMapping(value = "/uploadByOne", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResponseEntity<byte[]> uploadByOne(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/uploadByOne")
+            // produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResultTest uploadByOne(@RequestParam("file") MultipartFile file) {
         // @RequestParam("appName") String appName
         //接口权限白名单检查
         /*if (!ConfigUtil.getStringConfigList("whiteList").contains(appName)) {
@@ -66,7 +68,7 @@ public class FileController {
             //log.error(originalFilename);
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
-                return null;
+                return new ResultTest(null,500, "上传文件格式异常，非docx格式");
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
@@ -85,11 +87,11 @@ public class FileController {
             deleteFile.delete();
             tempFile.delete();
             //downloadFile.delete();
-            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+            return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK),200,"ok");
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();
-            return null;
+            return new ResultTest(null, 500, "\"上传文件处理异常：\" + e.getStackTrace()");
         }
     }
 

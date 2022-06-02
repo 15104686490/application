@@ -161,7 +161,7 @@ public class NewVersionDocServiceImpl implements DocService {
     }
 
     /**
-     * 替换文本中的特殊符号
+     * 替换文本中的内容
      * @param text
      * @param symbols
      * @param replaceString
