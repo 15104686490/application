@@ -29,6 +29,9 @@ public class NewVersionDocServiceImpl implements DocService {
     @Autowired
     ESAnalyzeDao esAnalyzeDao;
 
+    @Autowired
+    AnalysisServiceImpl analysisService;
+
     /**
      * 获取docx中的正文内容，不包含tables
      *
@@ -90,7 +93,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 XWPFRun newRun = xp.createRun();
                 int i = 1;
                 String text = replaceSpecialSymbol(xp.getText(), symbols, "");
-                List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
+                List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
                 int j = 0;
                 for (String words : analysisResults) {
                     if (dictionaryConfigs.contains(words)) {
@@ -105,7 +108,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         }
 
                         newRun.addBreak();
-                        log.error(words);
+                        // log.error(words);
                         i++;
                     }
                     j++;
@@ -122,7 +125,7 @@ public class NewVersionDocServiceImpl implements DocService {
                             XWPFRun newRun = xp.createRun();
                             int i = 1;
                             String text = replaceSpecialSymbol(xp.getText(), symbols, "");
-                            List<String> analysisResults = esAnalyzeDao.getOriginalIKSmartAnalysisWords(text);
+                            List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
                             // log.error(text);
                             int j = 0;
                             for (String words : analysisResults) {
@@ -139,7 +142,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }
 
                                     newRun.addBreak();
-                                    log.error(words);
+                                    // log.error(words);
                                     i++;
                                 }
                             }

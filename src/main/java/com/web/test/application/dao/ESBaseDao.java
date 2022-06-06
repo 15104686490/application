@@ -21,12 +21,19 @@ public abstract class ESBaseDao {
     static RestHighLevelClient client;
 
     static {
-        String host = ConfigUtil.getStringConfig("ESHost");
-        int activePort = ConfigUtil.getIntegerConfig("ESActivePort");
-        int standbyPort = ConfigUtil.getIntegerConfig("ESStandbyPort");
-        client = new RestHighLevelClient(RestClient.builder(
-                new HttpHost(host, activePort, "http"),
-                new HttpHost(host, standbyPort, "http")));
+        try {
+            log.info("ES client is initializing");
+            String host = ConfigUtil.getStringConfig("ESHost");
+            int activePort = ConfigUtil.getIntegerConfig("ESActivePort");
+            int standbyPort = ConfigUtil.getIntegerConfig("ESStandbyPort");
+            client = new RestHighLevelClient(RestClient.builder(
+                    new HttpHost(host, activePort, "http"),
+                    new HttpHost(host, standbyPort, "http")));
+            log.info("ES client initializated successful");
+        } catch (Exception e) {
+            log.info("some errors occured during ES client initializated");
+            e.printStackTrace();
+        }
     }
 
     /**

@@ -10,7 +10,6 @@ import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
 import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
@@ -44,7 +43,7 @@ public class FileController {
      * @return
      */
     @PostMapping(value = "/uploadByOne")
-            // produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    // produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResultTest uploadByOne(@RequestParam("file") MultipartFile file) {
         // @RequestParam("appName") String appName
         //接口权限白名单检查
@@ -68,7 +67,7 @@ public class FileController {
             //log.error(originalFilename);
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
-                return new ResultTest(null,500, "上传文件格式异常，非docx格式");
+                return new ResultTest(null, 500, "上传文件格式异常，非docx格式");
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
@@ -87,7 +86,7 @@ public class FileController {
             deleteFile.delete();
             tempFile.delete();
             //downloadFile.delete();
-            return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK),200,"ok");
+            return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK), 200, "ok");
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();

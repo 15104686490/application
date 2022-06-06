@@ -1,4 +1,4 @@
-package com.web.test.application.test;
+package com.web.test.application.config;
 
 import org.springframework.stereotype.Component;
 
@@ -8,6 +8,9 @@ import javax.servlet.http.HttpServletResponse;
 import java.io.IOException;
 
 
+/**
+ * 处理出现的跨域访问问题
+ */
 @Component
 public class CorsFilter implements Filter {
     @Override
