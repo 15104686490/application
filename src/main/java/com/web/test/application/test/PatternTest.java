@@ -5,6 +5,9 @@ import com.web.test.application.config.NacosUtil;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
+/**
+ * 正则表达式测试
+ */
 public class PatternTest {
     public static void main(String[] args) {
 

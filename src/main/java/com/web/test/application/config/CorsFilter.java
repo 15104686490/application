@@ -9,7 +9,8 @@ import java.io.IOException;
 
 
 /**
- * 处理出现的跨域访问问题
+ * 本地测试处理出现的跨域访问问题，tomcat部署，若tomcat中也进行了，需要对这个filter进行调整，
+ * 否则重复处理会出现问题
  */
 @Component
 public class CorsFilter implements Filter {

@@ -1,4 +1,4 @@
-package com.web.test.application.test;
+package com.web.test.application.other;
 
 
 import lombok.AllArgsConstructor;
@@ -8,6 +8,10 @@ import lombok.ToString;
 
 import java.util.ArrayList;
 
+/**
+ * 返回结果封装
+ * @param <T>
+ */
 @Getter
 @Setter
 @ToString

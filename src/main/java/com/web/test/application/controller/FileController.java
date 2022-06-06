@@ -4,7 +4,7 @@ package com.web.test.application.controller;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
-import com.web.test.application.test.ResultTest;
+import com.web.test.application.other.ResultTest;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -37,7 +37,7 @@ public class FileController {
     private String FILE_PATH;
 
     /**
-     * 单个文件上传接口
+     * 单个文件上传&处理&下载结果 接口
      *
      * @param file
      * @return
