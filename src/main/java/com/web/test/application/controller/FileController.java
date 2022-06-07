@@ -37,14 +37,14 @@ public class FileController {
     private String FILE_PATH;
 
     /**
-     * 单个文件上传&处理&下载结果 接口
+     * 单个文件上传 &处理 &下载结果 接口
      *
      * @param file
      * @return
      */
-    @PostMapping(value = "/uploadByOne")
-    // produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
-    public ResultTest uploadByOne(@RequestParam("file") MultipartFile file) {
+    @PostMapping(value = "/uploadByOne"
+    , produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    public ResponseEntity uploadByOne(@RequestParam("file") MultipartFile file) {
         // @RequestParam("appName") String appName
         //接口权限白名单检查
         /*if (!ConfigUtil.getStringConfigList("whiteList").contains(appName)) {
@@ -52,6 +52,7 @@ public class FileController {
             return null;
         }*/
         try {
+            byte[] content;
             FILE_PATH = ConfigUtil.getStringConfig("file_path");
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -67,7 +68,9 @@ public class FileController {
             //log.error(originalFilename);
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
-                return new ResultTest(null, 500, "上传文件格式异常，非docx格式");
+                //return new ResultTest(null, 500, "上传文件格式异常，非docx格式");
+                return null;
+
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
@@ -78,7 +81,7 @@ public class FileController {
                     new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
             headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            byte[] content = FileUtils.readFileToByteArray(downloadFile);
+            content = FileUtils.readFileToByteArray(downloadFile);
 
             //清除临时文件
             //log.error(deleteFileName);
@@ -86,11 +89,13 @@ public class FileController {
             deleteFile.delete();
             tempFile.delete();
             //downloadFile.delete();
-            return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK), 200, "ok");
+            // return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK), 200, "ok");
+            return new ResponseEntity<>(content, headers, HttpStatus.OK);
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();
-            return new ResultTest(null, 500, "\"上传文件处理异常：\" + e.getStackTrace()");
+            // return new ResultTest(null, 500, "\"上传文件处理异常：\" + e.getStackTrace()");
+            return null;
         }
     }
 

@@ -83,7 +83,8 @@ public class NewVersionDocServiceImpl implements DocService {
         HashSet dictionaryConfigs = new HashSet();
         dictionaryConfigs.addAll(ConfigUtil.getStringConfigList("dictionary_words"));
         List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
-
+        boolean isBold = Boolean.valueOf(ConfigUtil.getStringConfig("text_bold_flag"));
+        String newTextColor = ConfigUtil.getStringConfig("new_text_color");
         try {
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage(oldPath));
@@ -97,9 +98,10 @@ public class NewVersionDocServiceImpl implements DocService {
                 int j = 0;
                 for (String words : analysisResults) {
                     if (dictionaryConfigs.contains(words)) {
-                        newRun.setBold(true);
-                        newRun.setColor("FF0000");
-                        if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
+                        newRun.setBold(isBold);
+                        newRun.setColor(newTextColor);
+                        if ((j + 1) < analysisResults.size() && dictionaryConfigs
+                                .contains(words + analysisResults.get(j + 1))) {
                             newRun.setText(i + ". " + words + analysisResults.get(j + 1));
                         } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
                             continue;
@@ -130,10 +132,11 @@ public class NewVersionDocServiceImpl implements DocService {
                             int j = 0;
                             for (String words : analysisResults) {
                                 if (dictionaryConfigs.contains(words)) {
-                                    newRun.setBold(true);
-                                    newRun.setColor("FF0000");
+                                    newRun.setBold(isBold);
+                                    newRun.setColor(newTextColor);
                                     // newRun.setText(i + ". " + words);
-                                    if ((j + 1) < analysisResults.size() && dictionaryConfigs.contains(words + analysisResults.get(j + 1))) {
+                                    if ((j + 1) < analysisResults.size() && dictionaryConfigs
+                                            .contains(words + analysisResults.get(j + 1))) {
                                         newRun.setText(i + ". " + words + analysisResults.get(j + 1));
                                     } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
                                         continue;
@@ -165,6 +168,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
     /**
      * 替换文本中的内容
+     *
      * @param text
      * @param symbols
      * @param replaceString
