@@ -51,8 +51,15 @@ public class FileController {
             log.error(appName + "为未授权服务");
             return null;
         }*/
+        byte[] content;
+        HttpHeaders headers = new HttpHeaders();
+
         try {
-            byte[] content;
+            headers.setContentDispositionFormData("attachment",
+                    new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
             FILE_PATH = ConfigUtil.getStringConfig("file_path");
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -69,18 +76,13 @@ public class FileController {
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
                 //return new ResultTest(null, 500, "上传文件格式异常，非docx格式");
-                return null;
-
+                return new ResponseEntity<>(null, headers, HttpStatus.BAD_REQUEST); //400
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
             newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath);
             File downloadFile = new File(tempFilePath);
-            HttpHeaders headers = new HttpHeaders();
-            headers.setContentDispositionFormData("attachment",
-                    new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
-            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
-            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
             content = FileUtils.readFileToByteArray(downloadFile);
 
             //清除临时文件
@@ -90,12 +92,12 @@ public class FileController {
             tempFile.delete();
             //downloadFile.delete();
             // return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK), 200, "ok");
-            return new ResponseEntity<>(content, headers, HttpStatus.OK);
+            return new ResponseEntity<>(content, headers, HttpStatus.OK); //200
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();
             // return new ResultTest(null, 500, "\"上传文件处理异常：\" + e.getStackTrace()");
-            return null;
+            return new ResponseEntity<>(null, headers, HttpStatus.INTERNAL_SERVER_ERROR); //500
         }
     }
 
