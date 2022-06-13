@@ -45,6 +45,11 @@ public class OldVersionDocServiceImpl implements DocService {
         return null;
     }
 
+    @Override
+    public String checkRuluesOfTextRegx(String path, String fileName) {
+        return null;
+    }
+
     public static void main(String[] args) {
         /*for(String str : new OldVersionDocServiceImpl().getText("C:\\\\Users\\\\dell\\\\IdeaProjects\\\\doc-test\\\\doc-test\\\\src\\\\main\\\\java\\\\test\\\\test.doc")){
             System.out.println("str");

@@ -19,6 +19,8 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashSet;
 import java.util.List;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * 支持07后的版本 word docx后缀
@@ -149,6 +151,264 @@ public class NewVersionDocServiceImpl implements DocService {
                                     i++;
                                 }
                             }
+                        }
+                    }
+                }
+            }
+            File tempFile = new File(newPath);
+            FileOutputStream stream = new FileOutputStream(tempFile);
+            doc.write(stream); //写入
+            stream.close();
+            doc.close();
+            docx.close();
+        } catch (Exception e) {
+            log.error("检查docx文件中标准时出现异常");
+            e.printStackTrace();
+        }
+        return null;
+    }
+
+    /**
+     * 利用正则方式提取规则
+     *
+     * @param oldPath
+     * @param newPath
+     * @return
+     */
+    @Override
+    public String checkRuluesOfTextRegx(String oldPath, String newPath) {
+        HashSet<String> langConfigs = new HashSet<>();
+        HashSet<String> shortConfigs = new HashSet<>();
+        HashSet<String> codeConfigs = new HashSet<>();
+        List<String> textSymbol = new ArrayList<>();
+
+        langConfigs.addAll(ConfigUtil.getStringConfigList("lang_rules_configs"));
+        shortConfigs.addAll(ConfigUtil.getStringConfigList("short_rules_configs"));
+        codeConfigs.addAll(ConfigUtil.getStringConfigList("code_configs"));
+        //textSymbol.addAll(ConfigUtil.getStringConfigList("text_symbols"));
+
+        textSymbol.add("，");
+        textSymbol.add("；");
+        textSymbol.add("、");
+        textSymbol.add("和");
+        HashSet<Pattern> langConfigsPattern = new HashSet<>();
+        HashSet<Pattern> shortConfigsPattern = new HashSet<>();
+        HashSet<Pattern> codeConfigsPattern = new HashSet<>();
+        for (String str : langConfigs) {
+            Pattern pattern = Pattern.compile(str);
+            langConfigsPattern.add(pattern);
+        }
+        for (String str : shortConfigs) {
+            Pattern pattern = Pattern.compile(str);
+            shortConfigsPattern.add(pattern);
+        }
+        for (String str : codeConfigs) {
+            Pattern pattern = Pattern.compile(str);
+            codeConfigsPattern.add(pattern);
+        }
+
+
+        HashSet dictionaryConfigs = new HashSet();
+        List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
+
+        boolean isBold = Boolean.valueOf(ConfigUtil.getStringConfig("text_bold_flag"));
+        String newTextColor = ConfigUtil.getStringConfig("new_text_color");
+        try {
+            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
+                    .openPackage(oldPath));
+            XWPFDocument doc = docx.getDocument();
+            List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
+            for (XWPFParagraph xp : paragraph) {
+                XWPFRun newRun = xp.createRun();
+                int i = 1;
+                // String text = replaceSpecialSymbol(xp.getText(), symbols, "");
+                String text = xp.getText().replaceAll(" ", "");
+                text = replaceSpecialSymbol(text, textSymbol, "。");
+                List<String> textList = Arrays.asList(text.split("。"));
+                // List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                for (String str : textList) {
+                    boolean f = false;
+                    // Pattern patten = Pattern.compile(regx);//编译正则表达式
+                    // Matcher matcher = patten.matcher();// 指定要匹配的字符串
+
+                    // List<String> matchStrs = new ArrayList<>();
+
+                    /*while (matcher.find()) { //此处find（）每次被调用后，会偏移到下一个匹配
+                        // result.add(matcher.group());//获取当前匹配的值
+                        System.out.println(matcher.group());
+                    }*/
+
+                    for (Pattern p : langConfigsPattern) {
+                        Matcher matcher = p.matcher(str);
+                        newRun.setBold(isBold);
+                        newRun.setColor(newTextColor);
+                        if (matcher.find()) {
+                            String temp = matcher.group();
+                            log.error(temp);
+                            //此处暂时省略对照先验证提取
+                            newRun.setText(i + ". " + temp);
+                            newRun.addBreak();
+                            i++;
+                            f = true;
+                            break;
+                        }
+                    }
+                    if (!f) {
+                        for (Pattern p : codeConfigsPattern) {
+                            Matcher matcher = p.matcher(str);
+                            newRun.setBold(isBold);
+                            newRun.setColor(newTextColor);
+                            if (matcher.find()) {
+                                String temp = matcher.group();
+                                log.error(temp);
+                                //此处暂时省略对照先验证提取
+
+
+                                newRun.setText(i + ". " + temp);
+                                newRun.addBreak();
+                                i++;
+                                f = true;
+                                break;
+                            }
+                        }
+                    }
+
+                    if (!f) {
+                        for (Pattern p : shortConfigsPattern) {
+                            Matcher matcher = p.matcher(str);
+                            newRun.setBold(isBold);
+                            newRun.setColor(newTextColor);
+                            if(matcher.find()) {
+                                String temp = matcher.group();
+                                log.error(temp);
+                                //此处暂时省略对照先验证提取
+
+
+                                newRun.setText(i + ". " + temp);
+                                newRun.addBreak();
+                                i++;
+                                f = true;
+                                break;
+                            }
+                        }
+                    }
+                }
+                /*int j = 0;
+                for (String words : analysisResults) {
+                    if (dictionaryConfigs.contains(words)) {
+                        newRun.setBold(isBold);
+                        newRun.setColor(newTextColor);
+                        if ((j + 1) < analysisResults.size() && dictionaryConfigs
+                                .contains(words + analysisResults.get(j + 1))) {
+                            newRun.setText(i + ". " + words + analysisResults.get(j + 1));
+                        } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
+                            continue;
+                        } else {
+                            newRun.setText(i + ". " + words);
+                        }
+
+                        newRun.addBreak();
+                        // log.error(words);
+                        i++;
+                    }
+                    j++;
+                }*/
+            }
+            List<XWPFTable> charts = doc.getTables();
+            for (XWPFTable xwpfTable : charts) {
+                List<XWPFTableRow> xwpfTableRowList = xwpfTable.getRows();
+                for (XWPFTableRow xwpfTableRow : xwpfTableRowList) {
+                    List<XWPFTableCell> xwpfTableCells = xwpfTableRow.getTableCells();
+                    for (XWPFTableCell xwpfTableCell : xwpfTableCells) {
+                        List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
+                        for (XWPFParagraph xp : cellParagraphs) {
+                            int i = 1;
+                            /*XWPFRun newRun = xp.createRun();
+                            int i = 1;
+                            String text = replaceSpecialSymbol(xp.getText(), symbols, "");
+                            List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                            // log.error(text);
+                            int j = 0;
+                            for (String words : analysisResults) {
+                                if (dictionaryConfigs.contains(words)) {
+                                    newRun.setBold(isBold);
+                                    newRun.setColor(newTextColor);
+                                    // newRun.setText(i + ". " + words);
+                                    if ((j + 1) < analysisResults.size() && dictionaryConfigs
+                                            .contains(words + analysisResults.get(j + 1))) {
+                                        newRun.setText(i + ". " + words + analysisResults.get(j + 1));
+                                    } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
+                                        continue;
+                                    } else {
+                                        newRun.setText(i + ". " + words);
+                                    }
+
+                                    newRun.addBreak();
+                                    // log.error(words);
+                                    i++;
+                                }
+                            }*/
+
+                            XWPFRun newRun = xp.createRun();
+                            // int i = 1;
+                            String text = xp.getText().replaceAll(" ", "");
+                            text = replaceSpecialSymbol(text, textSymbol, "。");
+                            List<String> textList = Arrays.asList(text.split("。"));
+                            for (String str : textList) {
+                                boolean f = false;
+
+                                for (Pattern p : langConfigsPattern) {
+                                    Matcher matcher = p.matcher(str);
+                                    newRun.setBold(isBold);
+                                    newRun.setColor(newTextColor);
+                                    if (matcher.find()) {
+                                        String temp = matcher.group();
+                                        log.error(temp);
+                                        //此处暂时省略对照先验证提取
+                                        newRun.setText(i + ". " + temp);
+                                        newRun.addBreak();
+                                        i++;
+                                        f = true;
+                                        break;
+                                    }
+                                }
+                                if (!f) {
+                                    for (Pattern p : codeConfigsPattern) {
+                                        Matcher matcher = p.matcher(str);
+                                        newRun.setBold(isBold);
+                                        newRun.setColor(newTextColor);
+                                        if (matcher.find()) {
+                                            String temp = matcher.group();
+                                            log.error(temp);
+                                            //此处暂时省略对照先验证提取
+                                            newRun.setText(i + ". " + temp);
+                                            newRun.addBreak();
+                                            i++;
+                                            f = true;
+                                            break;
+                                        }
+                                    }
+                                }
+
+                                if (!f) {
+                                    for (Pattern p : shortConfigsPattern) {
+                                        Matcher matcher = p.matcher(str);
+                                        newRun.setBold(isBold);
+                                        newRun.setColor(newTextColor);
+                                        if (matcher.find()) {
+                                            String temp = matcher.group();
+                                            log.error(temp);
+                                            newRun.setText(i + ". " + temp);
+                                            newRun.addBreak();
+                                            i++;
+                                            //此处暂时省略对照先验证提取
+                                            f = true;
+                                            break;
+                                        }
+                                    }
+                                }
+                            }
+
                         }
                     }
                 }

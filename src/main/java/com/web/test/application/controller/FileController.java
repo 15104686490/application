@@ -43,7 +43,7 @@ public class FileController {
      * @return
      */
     @PostMapping(value = "/uploadByOne"
-    , produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+            , produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity uploadByOne(@RequestParam("file") MultipartFile file) {
         // @RequestParam("appName") String appName
         //接口权限白名单检查
@@ -53,7 +53,8 @@ public class FileController {
         }*/
         byte[] content;
         HttpHeaders headers = new HttpHeaders();
-
+        String dealModel = "regx";
+        dealModel = ConfigUtil.getStringConfig("deal_model");
         try {
             headers.setContentDispositionFormData("attachment",
                     new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
@@ -80,7 +81,14 @@ public class FileController {
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
-            newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath);
+            if (dealModel.equals("ik")) {
+                newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
+            } else if (dealModel.equals("regx")) {
+                //利用正则方式提取并比对
+                newVersionDocService.checkRuluesOfTextRegx(FILE_PATH + deleteFileName, tempFilePath);
+            }
+
+
             File downloadFile = new File(tempFilePath);
 
             content = FileUtils.readFileToByteArray(downloadFile);

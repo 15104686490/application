@@ -25,4 +25,6 @@ public interface DocService {
      * @return
      */
     public String checkRuluesOfText(String path, String fileName);
+
+    public String checkRuluesOfTextRegx(String path, String fileName);
 }
