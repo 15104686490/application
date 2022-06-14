@@ -34,6 +34,9 @@ public class NewVersionDocServiceImpl implements DocService {
     @Autowired
     AnalysisServiceImpl analysisService;
 
+    @Autowired
+    RulesService rulesService;
+
     /**
      * 获取docx中的正文内容，不包含tables
      *
@@ -228,15 +231,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 // List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
                 for (String str : textList) {
                     boolean f = false;
-                    // Pattern patten = Pattern.compile(regx);//编译正则表达式
-                    // Matcher matcher = patten.matcher();// 指定要匹配的字符串
 
-                    // List<String> matchStrs = new ArrayList<>();
-
-                    /*while (matcher.find()) { //此处find（）每次被调用后，会偏移到下一个匹配
-                        // result.add(matcher.group());//获取当前匹配的值
-                        System.out.println(matcher.group());
-                    }*/
 
                     for (Pattern p : langConfigsPattern) {
                         Matcher matcher = p.matcher(str);
@@ -246,9 +241,12 @@ public class NewVersionDocServiceImpl implements DocService {
                             String temp = matcher.group();
                             log.error(temp);
                             //此处暂时省略对照先验证提取
-                            newRun.setText(i + ". " + temp);
-                            newRun.addBreak();
-                            i++;
+                            if (!rulesService.queryFullNameList().contains(temp)) {
+                                newRun.setText(i + ". " + temp);
+                                newRun.addBreak();
+                                i++;
+
+                            }
                             f = true;
                             break;
                         }
@@ -262,11 +260,13 @@ public class NewVersionDocServiceImpl implements DocService {
                                 String temp = matcher.group();
                                 log.error(temp);
                                 //此处暂时省略对照先验证提取
+                                if (!rulesService.queryFullCodesSet().contains(temp)) {
 
+                                    newRun.setText(i + ". " + temp);
+                                    newRun.addBreak();
+                                    i++;
 
-                                newRun.setText(i + ". " + temp);
-                                newRun.addBreak();
-                                i++;
+                                }
                                 f = true;
                                 break;
                             }
@@ -278,41 +278,24 @@ public class NewVersionDocServiceImpl implements DocService {
                             Matcher matcher = p.matcher(str);
                             newRun.setBold(isBold);
                             newRun.setColor(newTextColor);
-                            if(matcher.find()) {
+                            if (matcher.find()) {
                                 String temp = matcher.group();
                                 log.error(temp);
                                 //此处暂时省略对照先验证提取
+                                if (!rulesService.queryCNNameSet().contains(temp)) {
 
+                                    newRun.setText(i + ". " + temp);
+                                    newRun.addBreak();
+                                    i++;
 
-                                newRun.setText(i + ". " + temp);
-                                newRun.addBreak();
-                                i++;
+                                }
                                 f = true;
                                 break;
                             }
                         }
                     }
                 }
-                /*int j = 0;
-                for (String words : analysisResults) {
-                    if (dictionaryConfigs.contains(words)) {
-                        newRun.setBold(isBold);
-                        newRun.setColor(newTextColor);
-                        if ((j + 1) < analysisResults.size() && dictionaryConfigs
-                                .contains(words + analysisResults.get(j + 1))) {
-                            newRun.setText(i + ". " + words + analysisResults.get(j + 1));
-                        } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
-                            continue;
-                        } else {
-                            newRun.setText(i + ". " + words);
-                        }
 
-                        newRun.addBreak();
-                        // log.error(words);
-                        i++;
-                    }
-                    j++;
-                }*/
             }
             List<XWPFTable> charts = doc.getTables();
             for (XWPFTable xwpfTable : charts) {
@@ -323,31 +306,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
                         for (XWPFParagraph xp : cellParagraphs) {
                             int i = 1;
-                            /*XWPFRun newRun = xp.createRun();
-                            int i = 1;
-                            String text = replaceSpecialSymbol(xp.getText(), symbols, "");
-                            List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
-                            // log.error(text);
-                            int j = 0;
-                            for (String words : analysisResults) {
-                                if (dictionaryConfigs.contains(words)) {
-                                    newRun.setBold(isBold);
-                                    newRun.setColor(newTextColor);
-                                    // newRun.setText(i + ". " + words);
-                                    if ((j + 1) < analysisResults.size() && dictionaryConfigs
-                                            .contains(words + analysisResults.get(j + 1))) {
-                                        newRun.setText(i + ". " + words + analysisResults.get(j + 1));
-                                    } else if ((j - 1) > 0 && dictionaryConfigs.contains(analysisResults.get(j - 1) + words)) {
-                                        continue;
-                                    } else {
-                                        newRun.setText(i + ". " + words);
-                                    }
 
-                                    newRun.addBreak();
-                                    // log.error(words);
-                                    i++;
-                                }
-                            }*/
 
                             XWPFRun newRun = xp.createRun();
                             // int i = 1;
@@ -365,9 +324,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                         String temp = matcher.group();
                                         log.error(temp);
                                         //此处暂时省略对照先验证提取
-                                        newRun.setText(i + ". " + temp);
-                                        newRun.addBreak();
-                                        i++;
+                                        if (!rulesService.queryFullNameList().contains(temp)) {
+                                            newRun.setText(i + ". " + temp);
+                                            newRun.addBreak();
+                                            i++;
+
+                                        }
                                         f = true;
                                         break;
                                     }
@@ -381,9 +343,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                             String temp = matcher.group();
                                             log.error(temp);
                                             //此处暂时省略对照先验证提取
-                                            newRun.setText(i + ". " + temp);
-                                            newRun.addBreak();
-                                            i++;
+                                            if (!rulesService.queryFullCodesSet().contains(temp)) {
+                                                newRun.setText(i + ". " + temp);
+                                                newRun.addBreak();
+                                                i++;
+
+                                            }
                                             f = true;
                                             break;
                                         }
@@ -398,10 +363,14 @@ public class NewVersionDocServiceImpl implements DocService {
                                         if (matcher.find()) {
                                             String temp = matcher.group();
                                             log.error(temp);
-                                            newRun.setText(i + ". " + temp);
-                                            newRun.addBreak();
-                                            i++;
-                                            //此处暂时省略对照先验证提取
+                                            if (!rulesService.queryFullCodesSet().contains(temp)) {
+                                                newRun.setText(i + ". " + temp);
+                                                newRun.addBreak();
+                                                i++;
+                                                //此处暂时省略对照先验证提取
+
+
+                                            }
                                             f = true;
                                             break;
                                         }
