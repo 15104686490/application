@@ -10,6 +10,9 @@ import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+/**
+ * 定时任务，定期扫表更新规则存储map
+ */
 @Slf4j
 @Component
 public class QueryRuleTask {

@@ -12,11 +12,17 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 
+/**
+ * 规则操作service
+ */
 @Service
 public class RulesService {
     @Autowired
     BaseMapper baseMapper;
 
+    /**
+     * 存储定时扫表获取的规则
+     */
     static ConcurrentMap<String, RuleSingleton> RULES_MAP = new ConcurrentHashMap<>();
 
     public List<String> queryFullNameList() {

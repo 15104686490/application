@@ -7,6 +7,9 @@ import lombok.Setter;
 import lombok.ToString;
 import lombok.extern.slf4j.Slf4j;
 
+/**
+ * 规则封装类
+ */
 @Getter
 @Setter
 @Slf4j
