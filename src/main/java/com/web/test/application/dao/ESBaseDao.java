@@ -31,7 +31,7 @@ public abstract class ESBaseDao {
                     new HttpHost(host, standbyPort, "http")));
             log.info("ES client initializated successful");
         } catch (Exception e) {
-            log.info("some errors occured during ES client initializated");
+            log.error("some errors occured during ES client initializated");
             e.printStackTrace();
         }
     }

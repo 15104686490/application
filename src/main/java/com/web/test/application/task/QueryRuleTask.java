@@ -1,5 +1,7 @@
 package com.web.test.application.task;
 
+import com.alibaba.nacos.api.config.annotation.NacosValue;
+import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.dao.BaseMapper;
 import com.web.test.application.model.RuleSingleton;
 import com.web.test.application.service.RulesService;
@@ -29,17 +31,24 @@ public class QueryRuleTask {
     }*/
 
 
-    @Scheduled(cron = "0 0/5 * * * ? ")
+    /**
+     * 定时任务更新内存中的规范存储map
+     */
+    @Scheduled(cron = "0 0/1 * * * ? ")
     public void updateMap() {
         log.error("更新规范Map");
         List<RuleSingleton> list = baseMapper.queryRulesList();
         list.forEach(r -> {
-            log.error("task   " + r.getFullName());
+           /* if (ConfigUtil.getBooleanConfig("")) {
+                log.error("task   " + r.getCnName());
+            }*/
             RulesService.getRulesMap().put(r.getFullName(), r);
         });
     }
 
     public static void main(String[] args) {
-
+        while(true){
+            Object o = new Object();
+        }
     }
 }

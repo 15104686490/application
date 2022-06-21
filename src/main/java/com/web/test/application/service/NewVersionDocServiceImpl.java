@@ -1,5 +1,6 @@
 package com.web.test.application.service;
 
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.config.NacosUtil;
 import com.web.test.application.dao.ESAnalyzeDao;
@@ -15,10 +16,7 @@ import org.springframework.stereotype.Service;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashSet;
-import java.util.List;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
@@ -37,12 +35,15 @@ public class NewVersionDocServiceImpl implements DocService {
     @Autowired
     RulesService rulesService;
 
+    boolean flag = true;
+
     /**
      * 获取docx中的正文内容，不包含tables
      *
      * @param path
      * @return
      */
+    @Deprecated
     @Override
     public List<String> getText(String path) {
         List<String> result = new ArrayList();
@@ -180,6 +181,12 @@ public class NewVersionDocServiceImpl implements DocService {
      */
     @Override
     public String checkRuluesOfTextRegx(String oldPath, String newPath) {
+        /*if (flag) {
+            //rulesService.showFullCode();
+            // rulesService.insertRulesV2();
+            flag = false;
+        }*/
+        XWPFParagraph first;
         HashSet<String> langConfigs = new HashSet<>();
         HashSet<String> shortConfigs = new HashSet<>();
         HashSet<String> codeConfigs = new HashSet<>();
@@ -190,10 +197,12 @@ public class NewVersionDocServiceImpl implements DocService {
         codeConfigs.addAll(ConfigUtil.getStringConfigList("code_configs"));
         //textSymbol.addAll(ConfigUtil.getStringConfigList("text_symbols"));
 
+        //java中正则是根据。号进行划分
         textSymbol.add("，");
         textSymbol.add("；");
         textSymbol.add("、");
-        textSymbol.add("和");
+        //textSymbol.add("和");
+
         HashSet<Pattern> langConfigsPattern = new HashSet<>();
         HashSet<Pattern> shortConfigsPattern = new HashSet<>();
         HashSet<Pattern> codeConfigsPattern = new HashSet<>();
@@ -210,7 +219,6 @@ public class NewVersionDocServiceImpl implements DocService {
             codeConfigsPattern.add(pattern);
         }
 
-
         HashSet dictionaryConfigs = new HashSet();
         List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
 
@@ -221,7 +229,12 @@ public class NewVersionDocServiceImpl implements DocService {
                     .openPackage(oldPath));
             XWPFDocument doc = docx.getDocument();
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
+            HashSet<String> totalResult = new HashSet<>();
+            ArrayList<String> resultList = new ArrayList<>();
             for (XWPFParagraph xp : paragraph) {
+                // log.error("foot text :  " + xp.getFootnoteText());
+                // log.error(""+doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages());
+                // log.error(xp.getText());
                 XWPFRun newRun = xp.createRun();
                 int i = 1;
                 // String text = replaceSpecialSymbol(xp.getText(), symbols, "");
@@ -230,70 +243,64 @@ public class NewVersionDocServiceImpl implements DocService {
                 List<String> textList = Arrays.asList(text.split("。"));
                 // List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
                 for (String str : textList) {
+                    LinkedHashSet<String> paragraphResult = new LinkedHashSet();
                     boolean f = false;
-
-
                     for (Pattern p : langConfigsPattern) {
                         Matcher matcher = p.matcher(str);
-                        newRun.setBold(isBold);
-                        newRun.setColor(newTextColor);
-                        if (matcher.find()) {
+                        // newRun.setBold(isBold);
+                        // newRun.setColor(newTextColor);
+                        while (matcher.find()) {
                             String temp = matcher.group();
                             log.error(temp);
                             //此处暂时省略对照先验证提取
                             if (!rulesService.queryFullNameList().contains(temp)) {
-                                newRun.setText(i + ". " + temp);
-                                newRun.addBreak();
+                                // newRun.setText(i + ". " + temp);
+                                // newRun.addBreak();
                                 i++;
-
+                                paragraphResult.add(temp);
+                                if (totalResult.add(temp)) {
+                                    resultList.add(temp);
+                                }
                             }
                             f = true;
-                            break;
+                            // break;
                         }
                     }
                     if (!f) {
                         for (Pattern p : codeConfigsPattern) {
                             Matcher matcher = p.matcher(str);
-                            newRun.setBold(isBold);
-                            newRun.setColor(newTextColor);
-                            if (matcher.find()) {
+                            // newRun.setBold(isBold);
+                            // newRun.setColor(newTextColor);
+                            while (matcher.find()) {
                                 String temp = matcher.group();
                                 log.error(temp);
                                 //此处暂时省略对照先验证提取
                                 if (!rulesService.queryFullCodesSet().contains(temp)) {
 
-                                    newRun.setText(i + ". " + temp);
-                                    newRun.addBreak();
+                                    // newRun.setText(i + ". " + temp);
+                                    // newRun.addBreak();
                                     i++;
+                                    paragraphResult.add(temp);
+                                    if (totalResult.add(temp)) {
+                                        resultList.add(temp);
+                                    }
 
                                 }
                                 f = true;
-                                break;
+                                // break;
                             }
                         }
                     }
+                    newRun.setBold(isBold);
+                    newRun.setColor(newTextColor);
+                    int j = 1;
+                    for (String pr : paragraphResult) {
 
-                    if (!f) {
-                        for (Pattern p : shortConfigsPattern) {
-                            Matcher matcher = p.matcher(str);
-                            newRun.setBold(isBold);
-                            newRun.setColor(newTextColor);
-                            if (matcher.find()) {
-                                String temp = matcher.group();
-                                log.error(temp);
-                                //此处暂时省略对照先验证提取
-                                if (!rulesService.queryCNNameSet().contains(temp)) {
-
-                                    newRun.setText(i + ". " + temp);
-                                    newRun.addBreak();
-                                    i++;
-
-                                }
-                                f = true;
-                                break;
-                            }
-                        }
+                        newRun.setText(j + ". " + pr);
+                        newRun.addBreak();
+                        j++;
                     }
+
                 }
 
             }
@@ -315,42 +322,50 @@ public class NewVersionDocServiceImpl implements DocService {
                             List<String> textList = Arrays.asList(text.split("。"));
                             for (String str : textList) {
                                 boolean f = false;
-
+                                TreeSet<String> paragraphResult = new TreeSet();
                                 for (Pattern p : langConfigsPattern) {
                                     Matcher matcher = p.matcher(str);
-                                    newRun.setBold(isBold);
-                                    newRun.setColor(newTextColor);
-                                    if (matcher.find()) {
+                                    // newRun.setBold(isBold);
+                                    // newRun.setColor(newTextColor);
+                                    while (matcher.find()) {
                                         String temp = matcher.group();
                                         log.error(temp);
                                         //此处暂时省略对照先验证提取
                                         if (!rulesService.queryFullNameList().contains(temp)) {
-                                            newRun.setText(i + ". " + temp);
-                                            newRun.addBreak();
+                                            // newRun.setText(i + ". " + temp);
+                                            // newRun.addBreak();
                                             i++;
+                                            paragraphResult.add(temp);
+                                            if (totalResult.add(temp)) {
+                                                resultList.add(temp);
+                                            }
 
                                         }
                                         f = true;
-                                        break;
+                                        // break;
                                     }
                                 }
                                 if (!f) {
                                     for (Pattern p : codeConfigsPattern) {
                                         Matcher matcher = p.matcher(str);
-                                        newRun.setBold(isBold);
-                                        newRun.setColor(newTextColor);
-                                        if (matcher.find()) {
+                                        // newRun.setBold(isBold);
+                                        // newRun.setColor(newTextColor);
+                                        while (matcher.find()) {
                                             String temp = matcher.group();
                                             log.error(temp);
                                             //此处暂时省略对照先验证提取
                                             if (!rulesService.queryFullCodesSet().contains(temp)) {
-                                                newRun.setText(i + ". " + temp);
-                                                newRun.addBreak();
+                                                // newRun.setText(i + ". " + temp);
+                                                // newRun.addBreak();
                                                 i++;
+                                                paragraphResult.add(temp);
+                                                if (totalResult.add(temp)) {
+                                                    resultList.add(temp);
+                                                }
 
                                             }
                                             f = true;
-                                            break;
+                                            //break;
                                         }
                                     }
                                 }
@@ -358,23 +373,35 @@ public class NewVersionDocServiceImpl implements DocService {
                                 if (!f) {
                                     for (Pattern p : shortConfigsPattern) {
                                         Matcher matcher = p.matcher(str);
-                                        newRun.setBold(isBold);
-                                        newRun.setColor(newTextColor);
-                                        if (matcher.find()) {
+                                        // newRun.setBold(isBold);
+                                        // newRun.setColor(newTextColor);
+                                        while (matcher.find()) {
                                             String temp = matcher.group();
                                             log.error(temp);
-                                            if (!rulesService.queryFullCodesSet().contains(temp)) {
-                                                newRun.setText(i + ". " + temp);
-                                                newRun.addBreak();
+                                            if (!rulesService.queryCNNameSet().contains(temp)) {
+                                                // newRun.setText(i + ". " + temp);
+                                                // newRun.addBreak();
                                                 i++;
                                                 //此处暂时省略对照先验证提取
-
+                                                paragraphResult.add(temp);
+                                                if (totalResult.add(temp)) {
+                                                    resultList.add(temp);
+                                                }
 
                                             }
                                             f = true;
-                                            break;
+                                            // break;
                                         }
                                     }
+                                }
+
+                                newRun.setBold(isBold);
+                                newRun.setColor(newTextColor);
+                                int j = 1;
+                                for (String pr : paragraphResult) {
+                                    newRun.setText(j + ". " + pr);
+                                    newRun.addBreak();
+                                    j++;
                                 }
                             }
 
@@ -382,6 +409,26 @@ public class NewVersionDocServiceImpl implements DocService {
                     }
                 }
             }
+
+            if (paragraph.size() >= 1) {
+                XWPFParagraph xp = paragraph.get(0);
+                XWPFRun newRun = xp.createRun();
+                newRun.setBold(isBold);
+                newRun.setColor(newTextColor);
+                int k = 1;
+                for (int i = 0; i < 10; i++) {
+                    newRun.addBreak();
+                }
+                newRun.setText("本文中下列引用规范可能存在问题，请进行核对：");
+                newRun.addBreak();
+                for (String s : resultList) {
+                    newRun.setText(k + ". " + s);
+                    newRun.addBreak();
+                    k++;
+                }
+            }
+
+
             File tempFile = new File(newPath);
             FileOutputStream stream = new FileOutputStream(tempFile);
             doc.write(stream); //写入

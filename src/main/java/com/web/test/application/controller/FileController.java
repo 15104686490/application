@@ -4,7 +4,7 @@ package com.web.test.application.controller;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
-import com.web.test.application.other.ResultTest;
+
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -56,6 +56,7 @@ public class FileController {
         String dealModel = "regx";
         dealModel = ConfigUtil.getStringConfig("deal_model");
         try {
+
             headers.setContentDispositionFormData("attachment",
                     new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
             headers.add("Access-Control-Expose-Headers", "Content-Disposition");
@@ -65,12 +66,14 @@ public class FileController {
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
             IOUtils.copy(is, os);
+
             byte[] bytes = os.toByteArray();
+
             log.error(file.getOriginalFilename()); //原始文件名称  包括后缀
             String originalFilename = file.getOriginalFilename();
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
-            //log.error("tempFileName   " + tempFileName);
+
             String deleteFileName = fileService.storeFile(bytes, tempFileName);
             String suffix = originalFilename.split("\\.")[1];
             //log.error(originalFilename);
@@ -81,6 +84,9 @@ public class FileController {
             }
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
+
+
+            //按模式标识采用不同的处理逻辑，模式标识存储在nacos配置中心中，可以实时切换
             if (dealModel.equals("ik")) {
                 newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
             } else if (dealModel.equals("regx")) {
@@ -94,17 +100,14 @@ public class FileController {
             content = FileUtils.readFileToByteArray(downloadFile);
 
             //清除临时文件
-            //log.error(deleteFileName);
             File deleteFile = new File(FILE_PATH + deleteFileName);
             deleteFile.delete();
             tempFile.delete();
-            //downloadFile.delete();
-            // return new ResultTest(new ResponseEntity<>(content, headers, HttpStatus.OK), 200, "ok");
+
             return new ResponseEntity<>(content, headers, HttpStatus.OK); //200
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();
-            // return new ResultTest(null, 500, "\"上传文件处理异常：\" + e.getStackTrace()");
             return new ResponseEntity<>(null, headers, HttpStatus.INTERNAL_SERVER_ERROR); //500
         }
     }
