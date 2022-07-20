@@ -34,8 +34,8 @@ public class RulesService {
         Set<String> hashSet = RULES_MAP.keySet();
         List<String> res = new ArrayList<>();
         // res.addAll(hashSet);
-        RULES_MAP.forEach((a,b)->{
-            res.add(b.getFullName().replaceAll(" ",""));
+        RULES_MAP.forEach((a, b) -> {
+            res.add(b.getFullName().replaceAll(" ", ""));
         });
         return res;
     }
@@ -43,7 +43,7 @@ public class RulesService {
     public Set<String> queryCNNameSet() {
         Set<String> hashSet = new HashSet<>();
         RULES_MAP.forEach((s, r) -> {
-            hashSet.add(r.getCnName().replaceAll(" ",""));
+            hashSet.add(r.getCnName().replaceAll(" ", ""));
         });
         return hashSet;
     }
@@ -52,18 +52,17 @@ public class RulesService {
     public Set<String> queryFullCodesSet() {
         Set<String> hashSet = new HashSet<>();
         RULES_MAP.forEach((s, r) -> {
-            hashSet.add(r.getFullCode().replaceAll(" ",""));
+            hashSet.add(r.getFullCode().replaceAll(" ", ""));
         });
         return hashSet;
     }
-
 
 
     public static ConcurrentMap getRulesMap() {
         return RULES_MAP;
     }
 
-    public void insertRules(){
+    public void insertRules() {
 
         int[] array = {1, 2, 3, 11, 20, 34, 68, 79, 100, 107, 142, 147,
                 170, 181, 236, 312, 345, 361, 383, 440, 475, 476, 477, 478, 479, 481,
@@ -103,14 +102,14 @@ public class RulesService {
                     }
                     j++;
                     System.out.println(j);
-                    RuleSingleton ruleSingleton1 = new RuleSingleton(stubStrs.get(2).replaceAll(" ",""),
-                            stubStrs.get(1).replaceAll(" ",""),
-                            "《"+stubStrs.get(2).replaceAll(" ","")+"》（"+stubStrs.get(1).replaceAll(" ","")+"）");
+                    RuleSingleton ruleSingleton1 = new RuleSingleton(stubStrs.get(2).replaceAll(" ", ""),
+                            stubStrs.get(1).replaceAll(" ", ""),
+                            "《" + stubStrs.get(2).replaceAll(" ", "") + "》（" + stubStrs.get(1).replaceAll(" ", "") + "）");
 
 
-                    RuleSingleton ruleSingleton2 = new RuleSingleton(stubStrs.get(2).replaceAll(" ",""),
-                            stubStrs.get(1).replaceAll(" ",""),
-                            "《"+stubStrs.get(2).replaceAll(" ","")+"（"+stubStrs.get(1).replaceAll(" ","")+"）》");
+                    RuleSingleton ruleSingleton2 = new RuleSingleton(stubStrs.get(2).replaceAll(" ", ""),
+                            stubStrs.get(1).replaceAll(" ", ""),
+                            "《" + stubStrs.get(2).replaceAll(" ", "") + "（" + stubStrs.get(1).replaceAll(" ", "") + "）》");
                     System.out.println(ruleSingleton1.toString());
                     System.out.println(ruleSingleton2.toString());
                     baseMapper.add(ruleSingleton1);
@@ -127,14 +126,14 @@ public class RulesService {
                     }
                     j++;
                     System.out.println(j);
-                    RuleSingleton ruleSingleton1 = new RuleSingleton(stubStrs.get(2).replaceAll(" ",""),
-                            stubStrs.get(1).replaceAll(" ",""),
-                            "《"+stubStrs.get(2).replaceAll(" ","")+"》（"+stubStrs.get(1).replaceAll(" ","")+"）");
+                    RuleSingleton ruleSingleton1 = new RuleSingleton(stubStrs.get(2).replaceAll(" ", ""),
+                            stubStrs.get(1).replaceAll(" ", ""),
+                            "《" + stubStrs.get(2).replaceAll(" ", "") + "》（" + stubStrs.get(1).replaceAll(" ", "") + "）");
 
 
-                    RuleSingleton ruleSingleton2 = new RuleSingleton(stubStrs.get(2).replaceAll(" ",""),
-                            stubStrs.get(1).replaceAll(" ",""),
-                            "《"+stubStrs.get(2).replaceAll(" ","")+"（"+stubStrs.get(1).replaceAll(" ","")+"）》");
+                    RuleSingleton ruleSingleton2 = new RuleSingleton(stubStrs.get(2).replaceAll(" ", ""),
+                            stubStrs.get(1).replaceAll(" ", ""),
+                            "《" + stubStrs.get(2).replaceAll(" ", "") + "（" + stubStrs.get(1).replaceAll(" ", "") + "）》");
                     System.out.println(ruleSingleton1.toString());
                     System.out.println(ruleSingleton2.toString());
                     /*System.out.println(stubStrs.get(0) + " || " + stubStrs.get(1) + "  ||  " + stubStrs.get(2)
@@ -155,96 +154,128 @@ public class RulesService {
 
     }
 
-    public void showFullCode(){
-        for(String str : queryFullCodesSet()){
+    public void showFullCode() {
+        for (String str : queryFullCodesSet()) {
             log.error(str);
         }
 
-        for(String str : queryFullNameList()){
+        for (String str : queryFullNameList()) {
             log.error(str);
         }
 
-        for(String str : queryCNNameSet()){
+        for (String str : queryCNNameSet()) {
             log.error(str);
         }
     }
 
-    public void insertRulesV2(){
+    public void insertRulesV2() {
         try {
-        HashSet set =new HashSet();
-        ArrayList<RuleSingleton> arrayList = new ArrayList();
-        boolean f1 = true;
-        XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
-                .openPackage("D:\\科研院检测专业规范名称.docx"));
-        XWPFDocument doc = docx.getDocument();
-        List<XWPFTable> charts = doc.getTables();
-        for (XWPFTable xwpfTable : charts) {
-            List<XWPFTableRow> xwpfTableRowList = xwpfTable.getRows();
+            HashSet set = new HashSet();
+            ArrayList<RuleSingleton> arrayList = new ArrayList();
+            boolean f1 = true;
+            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
+                    .openPackage("D:\\科研院检测专业规范名称.docx"));
+            XWPFDocument doc = docx.getDocument();
+            List<XWPFTable> charts = doc.getTables();
+            for (XWPFTable xwpfTable : charts) {
+                List<XWPFTableRow> xwpfTableRowList = xwpfTable.getRows();
 
-            for (XWPFTableRow xwpfTableRow : xwpfTableRowList) {
-                List<XWPFTableCell> xwpfTableCells = xwpfTableRow.getTableCells();
-                if(f1) {
-                    f1 = false;
-                    continue;
-                }
-                String str1 = "";
-                for (XWPFTableCell xwpfTableCell : xwpfTableCells) {
-                    List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
+                for (XWPFTableRow xwpfTableRow : xwpfTableRowList) {
+                    List<XWPFTableCell> xwpfTableCells = xwpfTableRow.getTableCells();
+                    if (f1) {
+                        f1 = false;
+                        continue;
+                    }
+                    String str1 = "";
+                    for (XWPFTableCell xwpfTableCell : xwpfTableCells) {
+                        List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
 
-                    for (XWPFParagraph xp : cellParagraphs) {
-                        int i = 1;
-                        XWPFRun newRun = xp.createRun();
-                        // int i = 1;
-                        String text = xp.getText().replaceAll(" ", "");
-                        //text = replaceSpecialSymbol(text, textSymbol, "。");
-                        List<String> textList = Arrays.asList(text.split("。"));
+                        for (XWPFParagraph xp : cellParagraphs) {
+                            int i = 1;
+                            XWPFRun newRun = xp.createRun();
+                            // int i = 1;
+                            String text = xp.getText().replaceAll(" ", "");
+                            //text = replaceSpecialSymbol(text, textSymbol, "。");
+                            List<String> textList = Arrays.asList(text.split("。"));
 
 
-                        for (String str : textList) {
-                            //System.out.println(str);
-                            str1 = str1 +";" +str ;
+                            for (String str : textList) {
+                                //System.out.println(str);
+                                str1 = str1 + ";" + str;
+                            }
+
                         }
+                    }
+                    //System.out.println(str1);
+                    String[] strArray = str1.split(";");
+                    //System.out.println(strArray.length);
+                    String fullName1 = "";
 
+                    //RuleSingleton ruleSingleton = new RuleSingleton(strArray[2],strArray[3],fullName1);
+
+
+                    RuleSingleton ruleSingleton1 = new RuleSingleton(strArray[2].replaceAll(" ", ""),
+                            strArray[3].replaceAll(" ", ""),
+                            "《" + strArray[2].replaceAll(" ", "") + "》（" + strArray[3].replaceAll(" ", "") + "）");
+
+
+                    RuleSingleton ruleSingleton2 = new RuleSingleton(strArray[2].replaceAll(" ", ""),
+                            strArray[3].replaceAll(" ", ""),
+                            "《" + strArray[2].replaceAll(" ", "") + "（" + strArray[3].replaceAll(" ", "") + "）》");
+                    //System.out.println(ruleSingleton1.toString());
+                    //System.out.println(ruleSingleton2.toString());
+                    if (set.add(ruleSingleton1.getFullCode())) {
+                        //System.out.println(ruleSingleton1.toString());
+                        arrayList.add(ruleSingleton1);
+                        arrayList.add(ruleSingleton2);
+                    } else {
+                        System.out.println(ruleSingleton1);
                     }
                 }
-                //System.out.println(str1);
-                String [] strArray = str1.split(";");
-                //System.out.println(strArray.length);
-                String fullName1 = "";
 
-                //RuleSingleton ruleSingleton = new RuleSingleton(strArray[2],strArray[3],fullName1);
+            }
 
+            System.out.println(arrayList.size());
 
-                RuleSingleton ruleSingleton1 = new RuleSingleton(strArray[2].replaceAll(" ",""),
-                        strArray[3].replaceAll(" ",""),
-                        "《"+strArray[2].replaceAll(" ","")+"》（"+strArray[3].replaceAll(" ","")+"）");
-
-
-                RuleSingleton ruleSingleton2 = new RuleSingleton(strArray[2].replaceAll(" ",""),
-                        strArray[3].replaceAll(" ",""),
-                        "《"+strArray[2].replaceAll(" ","")+"（"+strArray[3].replaceAll(" ","")+"）》");
-                //System.out.println(ruleSingleton1.toString());
-                //System.out.println(ruleSingleton2.toString());
-                if(set.add(ruleSingleton1.getFullCode())){
-                    //System.out.println(ruleSingleton1.toString());
-                    arrayList.add(ruleSingleton1);
-                    arrayList.add(ruleSingleton2);
-                }else{
-                    System.out.println(ruleSingleton1);
+            for (RuleSingleton ruleSingleton : arrayList) {
+                if (!queryFullNameList().contains(ruleSingleton.getFullName())) {
+                    baseMapper.add(ruleSingleton);
                 }
             }
-
+        } catch (Exception e) {
+            e.printStackTrace();
         }
-
-        System.out.println(arrayList.size());
-
-        for(RuleSingleton ruleSingleton : arrayList){
-            if(!queryFullNameList().contains(ruleSingleton.getFullName())){
-                baseMapper.add(ruleSingleton);
-            }
-        }
-    } catch (Exception e) {
-        e.printStackTrace();
     }
+
+
+    public List getCommonRulePart() {
+        List list = new ArrayList();
+        HashSet<String> fArrayList = new HashSet<>();
+        HashSet<String> eArrayList = new HashSet<>();
+        HashSet<String> zhSet = new HashSet<>();
+        for (String str : queryCNNameSet()) {
+            fArrayList.add(str.substring(0, 4));
+        }
+
+        for (String str : queryCNNameSet()) {
+            eArrayList.add(str.substring(str.length() - 4, str.length()));
+        }
+
+        for (String str : queryCNNameSet()) {
+            zhSet.add(str.substring(0, 4) + "[^.]{0,35}" +str.substring(str.length() - 4, str.length()));
+        }
+
+        log.error("开头：");
+        fArrayList.forEach(s -> {
+            log.error(s);
+        });
+        list.add(fArrayList);
+        log.error("结尾：");
+        eArrayList.forEach(s -> {
+            log.error(s);
+        });
+        list.add(eArrayList);
+        list.add(zhSet);
+        return list;
     }
 }

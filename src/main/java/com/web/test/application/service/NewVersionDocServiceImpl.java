@@ -35,7 +35,7 @@ public class NewVersionDocServiceImpl implements DocService {
     @Autowired
     RulesService rulesService;
 
-    boolean flag = true;
+    // boolean flag = true;
 
     /**
      * 获取docx中的正文内容，不包含tables
@@ -191,21 +191,18 @@ public class NewVersionDocServiceImpl implements DocService {
         HashSet<String> shortConfigs = new HashSet<>();
         HashSet<String> codeConfigs = new HashSet<>();
         List<String> textSymbol = new ArrayList<>();
-
-        langConfigs.addAll(ConfigUtil.getStringConfigList("lang_rules_configs"));
-        shortConfigs.addAll(ConfigUtil.getStringConfigList("short_rules_configs"));
-        codeConfigs.addAll(ConfigUtil.getStringConfigList("code_configs"));
-        //textSymbol.addAll(ConfigUtil.getStringConfigList("text_symbols"));
-
-        //java中正则是根据。号进行划分
-        textSymbol.add("，");
-        textSymbol.add("；");
-        textSymbol.add("、");
-        //textSymbol.add("和");
-
         HashSet<Pattern> langConfigsPattern = new HashSet<>();
         HashSet<Pattern> shortConfigsPattern = new HashSet<>();
         HashSet<Pattern> codeConfigsPattern = new HashSet<>();
+        langConfigs.addAll(ConfigUtil.getStringConfigList("lang_rules_configs"));
+        shortConfigs.addAll(ConfigUtil.getStringConfigList("p_set"));
+        codeConfigs.addAll(ConfigUtil.getStringConfigList("code_configs"));
+
+        textSymbol.add("，");
+        textSymbol.add("；");
+        textSymbol.add("、");
+
+
         for (String str : langConfigs) {
             Pattern pattern = Pattern.compile(str);
             langConfigsPattern.add(pattern);
@@ -219,9 +216,6 @@ public class NewVersionDocServiceImpl implements DocService {
             codeConfigsPattern.add(pattern);
         }
 
-        HashSet dictionaryConfigs = new HashSet();
-        List<String> symbols = ConfigUtil.getStringConfigList("special_symbols");
-
         boolean isBold = Boolean.valueOf(ConfigUtil.getStringConfig("text_bold_flag"));
         String newTextColor = ConfigUtil.getStringConfig("new_text_color");
         try {
@@ -232,30 +226,25 @@ public class NewVersionDocServiceImpl implements DocService {
             HashSet<String> totalResult = new HashSet<>();
             ArrayList<String> resultList = new ArrayList<>();
             for (XWPFParagraph xp : paragraph) {
-                // log.error("foot text :  " + xp.getFootnoteText());
-                // log.error(""+doc.getProperties().getExtendedProperties().getUnderlyingProperties().getPages());
-                // log.error(xp.getText());
+
                 XWPFRun newRun = xp.createRun();
                 int i = 1;
-                // String text = replaceSpecialSymbol(xp.getText(), symbols, "");
+
                 String text = xp.getText().replaceAll(" ", "");
                 text = replaceSpecialSymbol(text, textSymbol, "。");
                 List<String> textList = Arrays.asList(text.split("。"));
-                // List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+
                 for (String str : textList) {
                     LinkedHashSet<String> paragraphResult = new LinkedHashSet();
                     boolean f = false;
                     for (Pattern p : langConfigsPattern) {
                         Matcher matcher = p.matcher(str);
-                        // newRun.setBold(isBold);
-                        // newRun.setColor(newTextColor);
+
                         while (matcher.find()) {
                             String temp = matcher.group();
-                            log.error(temp);
+
                             //此处暂时省略对照先验证提取
                             if (!rulesService.queryFullNameList().contains(temp)) {
-                                // newRun.setText(i + ". " + temp);
-                                // newRun.addBreak();
                                 i++;
                                 paragraphResult.add(temp);
                                 if (totalResult.add(temp)) {
@@ -268,17 +257,14 @@ public class NewVersionDocServiceImpl implements DocService {
                     }
                     if (!f) {
                         for (Pattern p : codeConfigsPattern) {
+                            boolean codeFlag = false;
                             Matcher matcher = p.matcher(str);
-                            // newRun.setBold(isBold);
-                            // newRun.setColor(newTextColor);
+
                             while (matcher.find()) {
                                 String temp = matcher.group();
-                                log.error(temp);
                                 //此处暂时省略对照先验证提取
                                 if (!rulesService.queryFullCodesSet().contains(temp)) {
 
-                                    // newRun.setText(i + ". " + temp);
-                                    // newRun.addBreak();
                                     i++;
                                     paragraphResult.add(temp);
                                     if (totalResult.add(temp)) {
@@ -287,7 +273,11 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                 }
                                 f = true;
-                                // break;
+                                codeFlag = true;
+                                break;
+                            }
+                            if (codeFlag) {
+                                break;
                             }
                         }
                     }
@@ -314,7 +304,6 @@ public class NewVersionDocServiceImpl implements DocService {
                         for (XWPFParagraph xp : cellParagraphs) {
                             int i = 1;
 
-
                             XWPFRun newRun = xp.createRun();
                             // int i = 1;
                             String text = xp.getText().replaceAll(" ", "");
@@ -325,21 +314,16 @@ public class NewVersionDocServiceImpl implements DocService {
                                 TreeSet<String> paragraphResult = new TreeSet();
                                 for (Pattern p : langConfigsPattern) {
                                     Matcher matcher = p.matcher(str);
-                                    // newRun.setBold(isBold);
-                                    // newRun.setColor(newTextColor);
+
                                     while (matcher.find()) {
                                         String temp = matcher.group();
-                                        log.error(temp);
-                                        //此处暂时省略对照先验证提取
+
                                         if (!rulesService.queryFullNameList().contains(temp)) {
-                                            // newRun.setText(i + ". " + temp);
-                                            // newRun.addBreak();
                                             i++;
                                             paragraphResult.add(temp);
                                             if (totalResult.add(temp)) {
                                                 resultList.add(temp);
                                             }
-
                                         }
                                         f = true;
                                         // break;
@@ -347,16 +331,13 @@ public class NewVersionDocServiceImpl implements DocService {
                                 }
                                 if (!f) {
                                     for (Pattern p : codeConfigsPattern) {
+                                        boolean codeFlag = false;
                                         Matcher matcher = p.matcher(str);
-                                        // newRun.setBold(isBold);
-                                        // newRun.setColor(newTextColor);
+
                                         while (matcher.find()) {
                                             String temp = matcher.group();
-                                            log.error(temp);
                                             //此处暂时省略对照先验证提取
                                             if (!rulesService.queryFullCodesSet().contains(temp)) {
-                                                // newRun.setText(i + ". " + temp);
-                                                // newRun.addBreak();
                                                 i++;
                                                 paragraphResult.add(temp);
                                                 if (totalResult.add(temp)) {
@@ -365,32 +346,36 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                             }
                                             f = true;
-                                            //break;
+                                            codeFlag = true;
+                                            break;
+                                        }
+                                        if (codeFlag) {
+                                            break;
                                         }
                                     }
                                 }
 
                                 if (!f) {
+                                    boolean breakFlag = false;
                                     for (Pattern p : shortConfigsPattern) {
                                         Matcher matcher = p.matcher(str);
-                                        // newRun.setBold(isBold);
-                                        // newRun.setColor(newTextColor);
                                         while (matcher.find()) {
                                             String temp = matcher.group();
-                                            log.error(temp);
+                                            // log.error(temp);
                                             if (!rulesService.queryCNNameSet().contains(temp)) {
-                                                // newRun.setText(i + ". " + temp);
-                                                // newRun.addBreak();
                                                 i++;
-                                                //此处暂时省略对照先验证提取
                                                 paragraphResult.add(temp);
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
                                                 }
-
+                                            } else {
+                                                f = true;
+                                                breakFlag = true;
+                                                break;
                                             }
-                                            f = true;
-                                            // break;
+                                        }
+                                        if (breakFlag) {
+                                            break;
                                         }
                                     }
                                 }
@@ -410,7 +395,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 }
             }
 
-            if (paragraph.size() >= 1) {
+            if (paragraph.size() >= 1 && resultList != null && !resultList.isEmpty()) {
                 XWPFParagraph xp = paragraph.get(0);
                 XWPFRun newRun = xp.createRun();
                 newRun.setBold(isBold);

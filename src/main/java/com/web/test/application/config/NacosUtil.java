@@ -5,6 +5,7 @@ import com.alibaba.nacos.api.PropertyKeyConst;
 import com.alibaba.nacos.api.config.ConfigService;
 import com.alibaba.nacos.api.exception.NacosException;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 
 import java.util.Properties;
 
@@ -15,6 +16,7 @@ import java.util.Properties;
 @Slf4j
 public class NacosUtil {
     static ConfigService configService;
+
 
     static {
         log.info("nacos client is initializing");
@@ -33,6 +35,7 @@ public class NacosUtil {
 
     /**
      * 获取根据名称，从nacos获取配置
+     *
      * @param configName
      * @return
      */
