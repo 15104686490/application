@@ -10,6 +10,8 @@ import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.concurrent.ConcurrentMap;
 
 /**
  * 定时任务，定期扫表更新规则存储map
@@ -40,9 +42,11 @@ public class QueryRuleTask {
         if (executeFlag) {
             log.error("更新规范Map");
             List<RuleSingleton> list = baseMapper.queryRulesList();
+            ConcurrentMap<String, RuleSingleton> tempMap = new ConcurrentHashMap<>();
             list.forEach(r -> {
-                RulesService.getRulesMap().put(r.getFullName(), r);
+                tempMap.put(r.getFullName(), r);
             });
+            RulesService.setRulesMap(tempMap);
         } else {
             log.error("Map暂停更新");
         }

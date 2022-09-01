@@ -62,6 +62,10 @@ public class RulesService {
         return RULES_MAP;
     }
 
+    public static void setRulesMap(ConcurrentMap<String, RuleSingleton> newMap) {
+        RULES_MAP = newMap;
+    }
+
     public void insertRules() {
 
         int[] array = {1, 2, 3, 11, 20, 34, 68, 79, 100, 107, 142, 147,
@@ -262,7 +266,7 @@ public class RulesService {
         }
 
         for (String str : queryCNNameSet()) {
-            zhSet.add(str.substring(0, 4) + "[^.]{0,35}" +str.substring(str.length() - 4, str.length()));
+            zhSet.add(str.substring(0, 4) + "[^.]{0,35}" + str.substring(str.length() - 4, str.length()));
         }
 
         log.error("开头：");

@@ -58,11 +58,9 @@ public class FileController {
 
         byte[] content;
         HttpHeaders headers = new HttpHeaders();
-
         String dealModel = "regx";
         /*从配置中心获取当前的处理模式*/
         dealModel = ConfigUtil.getStringConfig("deal_model");
-
         try {
             headers.setContentDispositionFormData("attachment",
                     new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
@@ -77,22 +75,20 @@ public class FileController {
             String originalFilename = file.getOriginalFilename();
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
-
             String deleteFileName = fileService.storeFile(bytes, tempFileName);
             String suffix = originalFilename.split("\\.")[1];
+            /*目前支持对docx格式的处理，暂时没有支持老版本的doc格式*/
             //log.error(originalFilename);
-
             if (!suffix.equals("docx")) {
                 log.error("上传文件格式异常，非docx格式");
                 //return new ResultTest(null, 500, "上传文件格式异常，非docx格式");
                 return new ResponseEntity<>(null, headers, HttpStatus.BAD_REQUEST); //400
             }
-
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
-
-
-            /*按模式标识采用不同的处理逻辑，模式标识存储在nacos配置中心中，可以实时切换*/
+            /*按模式标识采用不同的处理逻辑，模式标识存储在nacos配置中心中，可以实时切换
+            * ik模式暂时弃用
+            * */
             if (dealModel.equals("ik")) {
                 newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
             } else if (dealModel.equals("regx")) {

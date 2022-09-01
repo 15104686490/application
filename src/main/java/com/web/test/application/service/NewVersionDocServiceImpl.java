@@ -413,7 +413,6 @@ public class NewVersionDocServiceImpl implements DocService {
                 }
             }
 
-
             File tempFile = new File(newPath);
             FileOutputStream stream = new FileOutputStream(tempFile);
             doc.write(stream); //写入
