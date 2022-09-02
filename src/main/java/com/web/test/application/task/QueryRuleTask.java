@@ -25,6 +25,8 @@ public class QueryRuleTask {
 
 
 
+
+
     /*@Scheduled(cron = "0 0/5 * * * ? ")
     public void test() {
         log.error("两秒一次");
@@ -35,7 +37,7 @@ public class QueryRuleTask {
     /**
      * 定时任务更新内存中的规范存储map
      */
-    @Scheduled(cron = "0 0/1 * * * ? ")
+    @Scheduled(cron = "0 0/5 * * * ? ")
     public void updateMap() {
         boolean executeFlag = true;
         executeFlag = ConfigUtil.getBooleanConfig("execute_flag");
@@ -52,7 +54,15 @@ public class QueryRuleTask {
         }
     }
 
-    public static void main(String[] args) {
+    /**
+     *
+     */
+    @Scheduled(cron = "")
+    public void checkRules(){
 
     }
+
+    /*public static void main(String[] args) {
+
+    }*/
 }

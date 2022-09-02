@@ -5,6 +5,7 @@ import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.config.NacosUtil;
 import com.web.test.application.dao.ESAnalyzeDao;
 
+import com.web.test.application.model.CheckResultSingleton;
 import com.web.test.application.test.PatternUtil;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.poi.ooxml.POIXMLDocument;
@@ -200,7 +201,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
         textSymbol.add("，");
         textSymbol.add("；");
-        textSymbol.add("、");
+        // textSymbol.add("、");
 
 
         for (String str : langConfigs) {
@@ -224,6 +225,9 @@ public class NewVersionDocServiceImpl implements DocService {
             XWPFDocument doc = docx.getDocument();
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             HashSet<String> totalResult = new HashSet<>();
+
+            ArrayList<CheckResultSingleton> resultSingletonList = new ArrayList<>();
+
             ArrayList<String> resultList = new ArrayList<>();
             for (XWPFParagraph xp : paragraph) {
 
@@ -237,6 +241,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 for (String str : textList) {
                     LinkedHashSet<String> paragraphResult = new LinkedHashSet();
                     boolean f = false;
+                    /*完整规范名称*/
                     for (Pattern p : langConfigsPattern) {
                         Matcher matcher = p.matcher(str);
 
@@ -256,6 +261,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         }
                     }
                     if (!f) {
+                        /*编号*/
                         for (Pattern p : codeConfigsPattern) {
                             boolean codeFlag = false;
                             Matcher matcher = p.matcher(str);
@@ -268,6 +274,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                     i++;
                                     paragraphResult.add(temp);
                                     if (totalResult.add(temp)) {
+                                        String reason = "";
+                                        boolean errorOfCode = false;
+
+                                        CheckResultSingleton singleton = new CheckResultSingleton("","");
                                         resultList.add(temp);
                                     }
 
@@ -290,9 +300,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         newRun.addBreak();
                         j++;
                     }
-
                 }
-
             }
             List<XWPFTable> charts = doc.getTables();
             for (XWPFTable xwpfTable : charts) {
