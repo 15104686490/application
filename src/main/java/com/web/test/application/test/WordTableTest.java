@@ -16,7 +16,7 @@ import java.util.regex.Pattern;
 
 public class WordTableTest {
     public static void main(String[] args) {
-        try {
+        /*try {
             HashSet set =new HashSet();
             ArrayList arrayList = new ArrayList();
             boolean f1 = true;
@@ -84,6 +84,6 @@ public class WordTableTest {
             System.out.println(arrayList.size());
         } catch (Exception e) {
             e.printStackTrace();
-        }
+        }*/
     }
 }

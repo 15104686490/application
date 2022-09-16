@@ -13,6 +13,7 @@ import java.util.List;
 
 public class PDFTEST {
     public static void main(String[] args) {
+/*
 
         int[] array = {1, 2, 3, 11, 20, 34, 68, 79, 100, 107, 142, 147,
                 170, 181, 236, 312, 345, 361, 383, 440, 475, 476, 477, 478, 479, 481,
@@ -36,9 +37,11 @@ public class PDFTEST {
             final String pdfText = stripper.getText(documentToBeParsed);
             System.out.println("Parsed text size is " + pdfText.length() + " characters:");
             //System.out.println(pdfText);
-            /*for(String str : pdfText.split("\n")){
+            */
+/*for(String str : pdfText.split("\n")){
                 System.out.println(str);
-            }*/
+            }*//*
+
             List<String> strs = Arrays.asList(pdfText.split("\n"));
             for (int i = 1; i < strs.size(); i++) {
 
@@ -84,8 +87,10 @@ public class PDFTEST {
                             "《"+stubStrs.get(2).replaceAll(" ","")+"（"+stubStrs.get(1).replaceAll(" ","")+")》");
                     System.out.println(ruleSingleton1.toString());
                     System.out.println(ruleSingleton2.toString());
-                    /*System.out.println(stubStrs.get(0) + " || " + stubStrs.get(1) + "  ||  " + stubStrs.get(2)
-                            + " || " + stubStrs.get(3) + "  size :" + stubStrs.size());*/
+                    */
+/*System.out.println(stubStrs.get(0) + " || " + stubStrs.get(1) + "  ||  " + stubStrs.get(2)
+                            + " || " + stubStrs.get(3) + "  size :" + stubStrs.size());*//*
+
 
                 } else {
                     // System.out.println(" 不包含 ：" + stubStrs.get(0));
@@ -96,6 +101,7 @@ public class PDFTEST {
         } catch (Exception e) {
             e.printStackTrace();
         }
+*/
 
 
     }

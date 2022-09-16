@@ -1,7 +1,11 @@
 package com.web.test.application.service;
 
+import com.alibaba.nacos.common.utils.ConcurrentHashSet;
 import com.web.test.application.dao.BaseMapper;
+import com.web.test.application.model.CollectRuleSingleton;
 import com.web.test.application.model.RuleSingleton;
+import com.web.test.application.other.PageQuery;
+import com.web.test.application.other.PageResult;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -9,6 +13,7 @@ import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
@@ -30,15 +35,31 @@ public class RulesService {
      */
     static ConcurrentMap<String, RuleSingleton> RULES_MAP = new ConcurrentHashMap<>();
 
+
+    /**
+     * 存储运行过程中的检测出有问题的标准
+     */
+    static ConcurrentMap<String, CollectRuleSingleton> COLLECT_RULES_MAP = new ConcurrentHashMap<>();
+
+
+    static ConcurrentMap<String, CollectRuleSingleton> DATA_BASE_COLLECT_RULES_MAP = new ConcurrentHashMap<>();
+
     public List<String> queryFullNameList() {
         Set<String> hashSet = RULES_MAP.keySet();
         List<String> res = new ArrayList<>();
         // res.addAll(hashSet);
         RULES_MAP.forEach((a, b) -> {
-            res.add(b.getFullName().replaceAll(" ", ""));
+            String temp = b.getFullName().replaceAll(" ", "");
+            temp = temp.replaceAll("（", "");
+            temp = temp.replaceAll("）", "");
+            temp = temp.replaceAll("《", "");
+            temp = temp.replaceAll("》", "");
+            //res.add(b.getFullName().replaceAll(" ", ""));
+            res.add(temp);
         });
         return res;
     }
+
 
     public Set<String> queryCNNameSet() {
         Set<String> hashSet = new HashSet<>();
@@ -52,7 +73,13 @@ public class RulesService {
     public Set<String> queryFullCodesSet() {
         Set<String> hashSet = new HashSet<>();
         RULES_MAP.forEach((s, r) -> {
-            hashSet.add(r.getFullCode().replaceAll(" ", ""));
+            String temp = r.getFullCode().replaceAll(" ", "");
+            temp.replaceAll("（", "");
+            temp.replaceAll("）", "");
+            temp.replaceAll("《", "");
+            temp.replaceAll("》", "");
+            // hashSet.add(r.getFullCode().replaceAll(" ", ""));
+            hashSet.add(temp);
         });
         return hashSet;
     }
@@ -66,7 +93,7 @@ public class RulesService {
         RULES_MAP = newMap;
     }
 
-    public void insertRules() {
+    /*public void insertRules() {
 
         int[] array = {1, 2, 3, 11, 20, 34, 68, 79, 100, 107, 142, 147,
                 170, 181, 236, 312, 345, 361, 383, 440, 475, 476, 477, 478, 479, 481,
@@ -90,9 +117,9 @@ public class RulesService {
             final String pdfText = stripper.getText(documentToBeParsed);
             System.out.println("Parsed text size is " + pdfText.length() + " characters:");
             //System.out.println(pdfText);
-            /*for(String str : pdfText.split("\n")){
+            *//*for(String str : pdfText.split("\n")){
                 System.out.println(str);
-            }*/
+            }*//*
             List<String> strs = Arrays.asList(pdfText.split("\n"));
             for (int i = 1; i < strs.size(); i++) {
 
@@ -140,8 +167,8 @@ public class RulesService {
                             "《" + stubStrs.get(2).replaceAll(" ", "") + "（" + stubStrs.get(1).replaceAll(" ", "") + "）》");
                     System.out.println(ruleSingleton1.toString());
                     System.out.println(ruleSingleton2.toString());
-                    /*System.out.println(stubStrs.get(0) + " || " + stubStrs.get(1) + "  ||  " + stubStrs.get(2)
-                            + " || " + stubStrs.get(3) + "  size :" + stubStrs.size());*/
+                    *//*System.out.println(stubStrs.get(0) + " || " + stubStrs.get(1) + "  ||  " + stubStrs.get(2)
+                            + " || " + stubStrs.get(3) + "  size :" + stubStrs.size());*//*
                     baseMapper.add(ruleSingleton1);
                     baseMapper.add(ruleSingleton2);
 
@@ -156,7 +183,7 @@ public class RulesService {
         }
 
 
-    }
+    }*/
 
     public void showFullCode() {
         for (String str : queryFullCodesSet()) {
@@ -172,7 +199,7 @@ public class RulesService {
         }
     }
 
-    public void insertRulesV2() {
+    /*public void insertRulesV2() {
         try {
             HashSet set = new HashSet();
             ArrayList<RuleSingleton> arrayList = new ArrayList();
@@ -249,7 +276,7 @@ public class RulesService {
         } catch (Exception e) {
             e.printStackTrace();
         }
-    }
+    }*/
 
 
     public List getCommonRulePart() {
@@ -282,4 +309,144 @@ public class RulesService {
         list.add(zhSet);
         return list;
     }
+
+
+    /**
+     *
+     */
+    public void collectNewRules() {
+        ConcurrentMap concurrentMap = new ConcurrentHashMap();
+        ConcurrentMap concurrentMap1 = new ConcurrentHashMap();
+        concurrentMap1.putAll(concurrentMap);
+    }
+
+    /**
+     * 查询库中标准类型
+     *
+     * @return
+     */
+    public List queryRuleType() {
+        List<String> typesList = new ArrayList<>();
+        try {
+            typesList = baseMapper.queryTypes();
+        } catch (Exception e) {
+            //e.printStackTrace();
+            log.error("查询标准类型列表出错   " + System.currentTimeMillis());
+            log.error(e.getMessage());
+        }
+
+        return baseMapper.queryTypes();
+    }
+
+
+    public List queryAllRulesWithType() {
+        List<RuleSingleton> rulesList = new ArrayList<>();
+        HashSet<String> hashSet = new HashSet<>();
+
+        for (RuleSingleton ruleSingleton : baseMapper.queryRulesListWithType()) {
+            if (hashSet.add(ruleSingleton.getFullCode())) {
+                rulesList.add(ruleSingleton);
+            }
+        }
+        log.error("共查询到标准的数量为" + rulesList.size());
+        //rulesList = baseMapper.queryRulesListWithType();
+        return rulesList;
+    }
+
+    public static void insertCollectRule(CollectRuleSingleton collectRuleSingleton) {
+        /*long timeStamp = System.currentTimeMillis();*/
+        if (!DATA_BASE_COLLECT_RULES_MAP.containsKey(collectRuleSingleton.getRuleString())) {
+            COLLECT_RULES_MAP.put(collectRuleSingleton.getRuleString(), collectRuleSingleton);
+        } else {
+
+        }
+    }
+
+
+    public static void setCollectRulesMap(ConcurrentMap<String, CollectRuleSingleton> newMap) {
+        DATA_BASE_COLLECT_RULES_MAP = newMap;
+    }
+
+    public static ConcurrentMap<String, CollectRuleSingleton> getCollectRulesMap() {
+        return COLLECT_RULES_MAP;
+    }
+
+    public static void clearCollectRulesMap() {
+        COLLECT_RULES_MAP.clear();
+    }
+
+
+    public List<String> getRulesType() {
+        List<String> arrayList = new ArrayList();
+        Set<String> hashSet = new HashSet<>();
+        RULES_MAP.forEach((s, r) -> {
+            hashSet.add(r.getType().replaceAll(" ", ""));
+        });
+        arrayList.addAll(hashSet);
+        return arrayList;
+    }
+
+    public PageResult queryRulePage(PageQuery pageQuery) {
+        List<String> types = pageQuery.getTypes();
+        List<RuleSingleton> ruleSingletonsList = queryAllRulesWithType();
+        List<RuleSingleton> list = new ArrayList<>();
+        String name = pageQuery.getQueryName();
+        if (types.size() == 1 && types.get(0).equals("all")) {
+            for (RuleSingleton ruleSingleton : ruleSingletonsList) {
+                if (ruleSingleton.getFullName().contains(name)) {
+                    list.add(ruleSingleton);
+                }
+            }
+        } else if (types.size() >= 1) {
+            for(RuleSingleton ruleSingleton : ruleSingletonsList){
+                if(ruleSingleton.getFullName().contains(name) && types.contains(ruleSingleton.getType())){
+                    list.add(ruleSingleton);
+                }
+            }
+        }
+        int ruleCount = list.size();
+        int pageCapacity = pageQuery.getPageCapacity();
+        int totalPages = 0;
+        int currentPage = pageQuery.getCurrentPage();
+        int prePages = currentPage - 1;
+        totalPages = ruleCount / pageCapacity;
+        int mod = ruleCount % pageCapacity;
+        if (mod > 0) {
+            totalPages++;
+        }
+        if (ruleCount <= pageCapacity) {
+            PageResult res = new PageResult(list, 200, 1, 1, pageCapacity, "");
+            return res;
+        }
+
+        if (currentPage >= totalPages) {
+
+            if(currentPage > totalPages){
+                prePages = totalPages - 1;
+            }
+
+            currentPage = totalPages;
+
+            int startCount = prePages * pageCapacity;
+            List<RuleSingleton> temp = new ArrayList();
+            for (int i = startCount; i < ruleCount; i++) {
+                temp.add(list.get(i));
+            }
+            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "");
+            return res;
+        }
+
+        if (currentPage < totalPages) {
+            int startCount = prePages * pageCapacity;
+            List<RuleSingleton> temp = new ArrayList();
+            for (int i = startCount; i < startCount + pageCapacity; i++) {
+                temp.add(list.get(i));
+            }
+            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "");
+            return res;
+        }
+        return null;
+    }
+
+
 }

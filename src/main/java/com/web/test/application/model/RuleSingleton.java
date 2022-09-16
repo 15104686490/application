@@ -33,4 +33,10 @@ public class RuleSingleton {
      */
     String fullName;
 
+
+    /**
+     * 标准分类
+     */
+    String type;
+
 }

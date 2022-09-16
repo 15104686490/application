@@ -6,6 +6,7 @@ import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
 
 import com.web.test.application.service.RulesService;
+import com.web.test.application.task.QueryRuleTask;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.commons.io.FileUtils;
@@ -20,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -55,7 +57,10 @@ public class FileController {
             log.error(appName + "为未授权服务");
             return null;
         }*/
-
+        if(!QueryRuleTask.RULES_FLAG){
+            log.error("服务未就绪");
+            return null;
+        }
         byte[] content;
         HttpHeaders headers = new HttpHeaders();
         String dealModel = "regx";
