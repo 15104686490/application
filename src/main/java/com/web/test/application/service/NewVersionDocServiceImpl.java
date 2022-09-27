@@ -194,6 +194,7 @@ public class NewVersionDocServiceImpl implements DocService {
         HashSet<String> shortConfigs = new HashSet<>();
         HashSet<String> codeConfigs = new HashSet<>();
         List<String> textSymbol = new ArrayList<>();
+        List<String> Symbols = new ArrayList<>();
         HashSet<Pattern> langConfigsPattern = new HashSet<>();
         HashSet<Pattern> shortConfigsPattern = new HashSet<>();
         HashSet<Pattern> codeConfigsPattern = new HashSet<>();
@@ -206,6 +207,8 @@ public class NewVersionDocServiceImpl implements DocService {
         textSymbol.add("，");
         textSymbol.add("；");
         // textSymbol.add("、");
+
+
 
 
         for (String str : langConfigs) {
@@ -269,7 +272,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 if (flag) {
                                     resultList.add(temp);
                                 }
-                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis()+""));
+                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                 /*库中没有此标准需判断标准有问题的原因，若没有原因则将此标准进行收集
                                  * 分别取出标准的编码和文字部分进行判断
                                  * */
@@ -349,7 +352,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                     i++;
                                     paragraphResult.add(temp);
-                                    RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis()+""));
+                                    RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                     if (totalResult.add(temp)) {
                                         String reason = "引用标准编码存在问题请检查";
                                         boolean errorOfCode = false;
@@ -407,7 +410,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 TreeSet<String> paragraphResult = new TreeSet();
                                 for (Pattern p : langConfigsPattern) {
                                     Matcher matcher = p.matcher(str);
-
+                                    /*log.error();*/
                                     while (matcher.find()) {
                                         String temp = matcher.group();
 
@@ -419,7 +422,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (flag) {
                                                 resultList.add(temp);
                                             }
-                                            RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis()+""));
+                                            RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                             /*库中没有此标准需判断标准有问题的原因，若没有原因则将此标准进行收集
                                              * 分别取出标准的编码和文字部分进行判断
                                              *
@@ -498,7 +501,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (!rulesService.queryFullCodesSet().contains(temp)) {
                                                 i++;
                                                 paragraphResult.add(temp);
-                                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis()+""));
+                                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
 
                                                 String reason = "引用标准编码存在问题请检查";
                                                 boolean errorOfCode = false;
@@ -530,7 +533,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (!rulesService.queryCNNameSet().contains(temp)) {
                                                 i++;
                                                 paragraphResult.add(temp);
-                                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis()+""));
+                                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
                                                     String reason = "引用标准名称存在问题请检查";
@@ -552,9 +555,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 newRun.setBold(isBold);
                                 newRun.setColor(newTextColor);
                                 int j = 1;
-
                                 /*控制段尾的输出*/
-                                //endPrintOfParagraph = ConfigUtil.getBooleanConfig("paragraph_end_print_flag");
                                 if (endPrintOfParagraph) {
                                     for (String pr : paragraphResult) {
                                         newRun.setText(j + ". " + pr);
@@ -562,10 +563,8 @@ public class NewVersionDocServiceImpl implements DocService {
                                         j++;
                                     }
                                 } else {
-
                                 }
                             }
-
                         }
                     }
                 }

@@ -6,9 +6,11 @@ import com.web.test.application.other.ResultTest;
 import com.web.test.application.service.RulesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 
 /**
@@ -51,7 +53,8 @@ public class RulesQueryController {
         }
     }
 
-    @RequestMapping(value = "/queryRulesPages", method = RequestMethod.POST)
+    //@RequestMapping(value = "/queryRulesPages", method = RequestMethod.POST)
+    @PostMapping(value = "/queryRulesPages")
     public PageResult queryRules(@RequestBody PageQuery pageQuery) {
         if (pageQuery == null) {
             return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空");
@@ -77,6 +80,50 @@ public class RulesQueryController {
             return new PageResult(null, 500, 1, 1, 10, "标准分页查询异常 : "
                     + e.getMessage());
         }
+    }
+
+    @ResponseBody
+    @GetMapping(value = "/getRulesPages")
+    public PageResult getRules(//@RequestBody PageQuery pageQuery,
+                               @RequestParam int currentPage, @RequestParam int pageCapacity, @RequestParam String types,
+                               @RequestParam String queryName) {
+        List<String> typesList = new ArrayList<>(Arrays.asList(types.split(";")));
+        PageQuery pageQuery = new PageQuery();
+        pageQuery.setQueryName(queryName);
+        pageQuery.setCurrentPage(currentPage);
+        pageQuery.setPageCapacity(pageCapacity);
+        pageQuery.setTypes(typesList);
+        if (pageQuery == null) {
+            return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空");
+        }
+
+        if (pageQuery.getCurrentPage() <= 0) {
+            pageQuery.setCurrentPage(1);
+        }
+
+        if (pageQuery.getPageCapacity() < 10) {
+            pageQuery.setPageCapacity(10);
+        }
+        /*rulesService.queryFullNameList();*/
+        if (pageQuery.getQueryName() == null) {
+            pageQuery.setQueryName("");
+        }
+        try {
+            PageResult res = rulesService.queryRulePage(pageQuery);
+            return res;
+        } catch (Exception e) {
+            e.printStackTrace();
+            log.error("标准分页查询异常 :" + e.getMessage());
+            return new PageResult(null, 500, 1, 1, 10, "标准分页查询异常 : "
+                    + e.getMessage());
+        }
+    }
+
+
+    @PostMapping("/postMethod")
+    public String testPostMothod() {
+        log.error("test post method...");
+        return "ok!!";
     }
 
 

@@ -48,7 +48,7 @@ public class FileController {
      * @param file
      * @return
      */
-    @PostMapping(value = "/uploadByOne", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
+    @PostMapping(value = "/uploadByOne", produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity uploadByOne(@RequestParam("file") MultipartFile file) {
 
         // @RequestParam("appName") String appName
