@@ -23,4 +23,6 @@ public class PageResult<T> {
 
     String msg;
 
+    int totalRulesCount;
+
 }

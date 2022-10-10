@@ -10,4 +10,9 @@ spring:
     multipart:
       max-file-size: 1024MB
       max-request-size: 1024MB
+pagehelper:
+  helper-dialect: mysql
+  reasonable: true
+  support-methods-arguments: true
+  params: count=countSql
 

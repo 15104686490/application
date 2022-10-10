@@ -60,6 +60,18 @@ public class RulesService {
         return res;
     }
 
+    public List<String> queryFullNameListWithSymbol() {
+        Set<String> hashSet = RULES_MAP.keySet();
+        List<String> res = new ArrayList<>();
+        // res.addAll(hashSet);
+        RULES_MAP.forEach((a, b) -> {
+            String temp = b.getFullName().replaceAll(" ", "");
+            //res.add(b.getFullName().replaceAll(" ", ""));
+            res.add(temp);
+        });
+        return res;
+    }
+
 
     public Set<String> queryCNNameSet() {
         Set<String> hashSet = new HashSet<>();
@@ -394,17 +406,22 @@ public class RulesService {
         if (types.size() == 1 && types.get(0).equals("all")) {
             for (RuleSingleton ruleSingleton : ruleSingletonsList) {
                 if (ruleSingleton.getFullName().contains(name)) {
+                    String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
                 }
             }
         } else if (types.size() >= 1) {
-            for(RuleSingleton ruleSingleton : ruleSingletonsList){
-                if(ruleSingleton.getFullName().contains(name) && types.contains(ruleSingleton.getType())){
+            for (RuleSingleton ruleSingleton : ruleSingletonsList) {
+                if (ruleSingleton.getFullName().contains(name) && types.contains(ruleSingleton.getType())) {
+                    String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
                 }
             }
         }
         int ruleCount = list.size();
+        log.error("总条数类似物：" + ruleCount);
         int pageCapacity = pageQuery.getPageCapacity();
         int totalPages = 0;
         int currentPage = pageQuery.getCurrentPage();
@@ -415,13 +432,13 @@ public class RulesService {
             totalPages++;
         }
         if (ruleCount <= pageCapacity) {
-            PageResult res = new PageResult(list, 200, 1, 1, pageCapacity, "");
+            PageResult res = new PageResult(list, 200, 1, 1, pageCapacity, "", ruleCount);
             return res;
         }
 
         if (currentPage >= totalPages) {
 
-            if(currentPage > totalPages){
+            if (currentPage > totalPages) {
                 prePages = totalPages - 1;
             }
 
@@ -432,7 +449,7 @@ public class RulesService {
             for (int i = startCount; i < ruleCount; i++) {
                 temp.add(list.get(i));
             }
-            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "");
+            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "", ruleCount);
             return res;
         }
 
@@ -442,7 +459,7 @@ public class RulesService {
             for (int i = startCount; i < startCount + pageCapacity; i++) {
                 temp.add(list.get(i));
             }
-            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "");
+            PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "", ruleCount);
             return res;
         }
         return null;

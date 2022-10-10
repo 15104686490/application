@@ -5,6 +5,7 @@ import com.web.test.application.other.PageResult;
 import com.web.test.application.other.ResultTest;
 import com.web.test.application.service.RulesService;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
@@ -20,6 +21,11 @@ import java.util.List;
 @RequestMapping("/query")
 @RestController
 public class RulesQueryController {
+
+
+    /*static{
+        ZipSecureFile.setMinInflateRatio(-1D);
+    }*/
 
 
     @Autowired
@@ -57,7 +63,8 @@ public class RulesQueryController {
     @PostMapping(value = "/queryRulesPages")
     public PageResult queryRules(@RequestBody PageQuery pageQuery) {
         if (pageQuery == null) {
-            return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空");
+            return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空"
+                    , 0);
         }
 
         if (pageQuery.getCurrentPage() <= 0) {
@@ -78,7 +85,7 @@ public class RulesQueryController {
             e.printStackTrace();
             log.error("标准分页查询异常 :" + e.getMessage());
             return new PageResult(null, 500, 1, 1, 10, "标准分页查询异常 : "
-                    + e.getMessage());
+                    + e.getMessage(), 0);
         }
     }
 
@@ -94,7 +101,8 @@ public class RulesQueryController {
         pageQuery.setPageCapacity(pageCapacity);
         pageQuery.setTypes(typesList);
         if (pageQuery == null) {
-            return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空");
+            return new PageResult(null, 500, 1, 0, 0, "查询异常，查询条件为空",
+                    0);
         }
 
         if (pageQuery.getCurrentPage() <= 0) {
@@ -115,7 +123,7 @@ public class RulesQueryController {
             e.printStackTrace();
             log.error("标准分页查询异常 :" + e.getMessage());
             return new PageResult(null, 500, 1, 1, 10, "标准分页查询异常 : "
-                    + e.getMessage());
+                    + e.getMessage(), 0);
         }
     }
 
