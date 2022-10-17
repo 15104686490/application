@@ -6,6 +6,9 @@ import com.web.test.application.model.CollectRuleSingleton;
 import com.web.test.application.model.RuleSingleton;
 import com.web.test.application.other.PageQuery;
 import com.web.test.application.other.PageResult;
+import jxl.Sheet;
+import jxl.Workbook;
+import jxl.read.biff.BiffException;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
@@ -17,6 +20,7 @@ import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Service;
 
 import java.io.File;
+import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -65,7 +69,8 @@ public class RulesService {
         List<String> res = new ArrayList<>();
         // res.addAll(hashSet);
         RULES_MAP.forEach((a, b) -> {
-            String temp = b.getFullName().replaceAll(" ", "");
+            // String temp = b.getFullName().replaceAll(" ", "");
+            String temp = "《"+b.getCnName()+"》"+"（"+b.getFullCode()+"）";
             //res.add(b.getFullName().replaceAll(" ", ""));
             res.add(temp);
         });
@@ -463,6 +468,72 @@ public class RulesService {
             return res;
         }
         return null;
+    }
+
+    public void getDataFromExcel(String path) {
+        //创建文件
+        // File xlsFile = new File("C:\\Users\\lzy15\\Desktop\\规范查询\\标准名称添加汇总.xls");
+        HashSet<String> set = new HashSet<>();
+        HashMap<String, String> map = new HashMap<>();
+        HashMap<String, RuleSingleton> ruleTemp = new HashMap<>();
+        RULES_MAP.forEach((k, v) -> {
+            ruleTemp.put(v.getFullCode().replaceAll(" ", ""), v);
+        });
+        File xlsFile = new File(path);
+        // 获得工作簿对象
+        Workbook workbook = null;
+        try {
+            workbook = Workbook.getWorkbook(xlsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BiffException e) {
+            e.printStackTrace();
+        }
+        // 获得所有工作表
+        Sheet[] sheets = workbook.getSheets();
+        // 遍历工作表
+        if (sheets != null) {
+            for (Sheet sheet : sheets) {
+                // 获得行数
+                int rows = sheet.getRows();
+                // 获得列数
+                int cols = sheet.getColumns();
+                // 读取数据
+                for (int row = 1; row < rows; row++) {
+                    String name = "";
+                    String code = "";
+                    for (int col = 1; col < 3; col++) {
+                        /*System.out.printf(sheet.getCell(col, row)
+                                .getContents().replaceAll(" ","") +" ");*/
+                        if (col == 2) {
+                            code = sheet.getCell(col, row).getContents().replaceAll(" ", "");
+                        } else {
+                            name = sheet.getCell(col, row).getContents().replaceAll(" ", "");
+                        }
+                    }
+                    if (set.add(code)) {
+                        map.put(code, name);
+                    }
+                    //System.out.println();
+                }
+            }
+        }
+        List<RuleSingleton> list = new ArrayList<>();
+        map.forEach((k, v) -> {
+            String type = "待分类";
+            if (ruleTemp.get(k) != null) {
+                type = ruleTemp.get(k).getType();
+            }
+            RuleSingleton temp = new RuleSingleton(v, k, "《" + v + "》" + "（" + k + "）", type);
+            RuleSingleton temp1 = new RuleSingleton(v, k, "《" + v + "（" + k + "）" + "》", type);
+            list.add(temp);
+            list.add(temp1);
+        });
+        list.forEach(l -> {
+            baseMapper.add(l);
+            System.out.println(l.toString());
+        });
+        workbook.close();
     }
 
 

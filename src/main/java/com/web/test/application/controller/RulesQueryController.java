@@ -135,4 +135,12 @@ public class RulesQueryController {
     }
 
 
+    @GetMapping("/getMethod")
+    public String insertMothod() {
+        // log.error("test post method...");
+        rulesService.getDataFromExcel("C:\\Users\\lzy15\\Desktop\\规范查询\\1015\\标准名称添加汇总.xls");
+        return "ok!!";
+    }
+
+
 }

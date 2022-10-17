@@ -8,5 +8,6 @@ public class Test0914 {
         System.out.println(85/10);
         System.out.println(90%10);
         System.out.println("123".contains(""));
+        System.currentTimeMillis();
     }
 }

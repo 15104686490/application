@@ -21,7 +21,7 @@ public abstract class ESBaseDao {
     static RestHighLevelClient client;
 
     static {
-        try {
+        /*try {
             log.info("ES client is initializing");
             String host = ConfigUtil.getStringConfig("ESHost");
             int activePort = ConfigUtil.getIntegerConfig("ESActivePort");
@@ -33,7 +33,7 @@ public abstract class ESBaseDao {
         } catch (Exception e) {
             log.error("some errors occured during ES client initializated");
             e.printStackTrace();
-        }
+        }*/
     }
 
     /**

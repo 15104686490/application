@@ -34,7 +34,7 @@ public class CommentController {
      * @return
      */
     @PostMapping(value = "/addComment")
-    public ResultTest queryRules(@RequestBody AddCommentQuery query) {
+    public ResultTest addComment(@RequestBody AddCommentQuery query) {
         if (query == null) {
             return new ResultTest(null, 500, "请求为空");
         }

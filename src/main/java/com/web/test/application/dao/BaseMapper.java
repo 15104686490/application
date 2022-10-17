@@ -25,7 +25,7 @@ public interface BaseMapper {
     @Select("select cn_name, full_code, full_name, rule_type from full_rules")
     public List<RuleSingleton> queryRulesListWithType();
 
-    @Insert({"insert into full_rules(cn_name, full_name, full_code) values(#{cnName}, #{fullName}, #{fullCode})"})
+    @Insert({"insert into full_rules(cn_name, full_name, full_code, rule_type) values(#{cnName}, #{fullName}, #{fullCode}, #{type})"})
     public int add(RuleSingleton ruleSingleton);
 
     @Select("select distinct rule_type from full_rules;")
@@ -41,7 +41,7 @@ public interface BaseMapper {
             "#{state}, #{commentTxt}, #{userId})"})
     public int addcomment(CommentSingleton commentSingleton);
 
-    @Select("select comment_id, state, comment_value, user_id, create_time from comment order by create_time asc")
+    @Select("select comment_id, state, comment_value, user_id, create_time from comment order by create_time desc")
     public List<CommentSingleton> queryComments();
 
 }

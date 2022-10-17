@@ -31,8 +31,8 @@ public class NewVersionDocServiceImpl implements DocService {
     @Autowired
     ESAnalyzeDao esAnalyzeDao;
 
-    @Autowired
-    AnalysisServiceImpl analysisService;
+   /* @Autowired
+    AnalysisServiceImpl analysisService;*/
 
     @Autowired
     RulesService rulesService;
@@ -102,7 +102,8 @@ public class NewVersionDocServiceImpl implements DocService {
                 XWPFRun newRun = xp.createRun();
                 int i = 1;
                 String text = replaceSpecialSymbol(xp.getText(), symbols, "");
-                List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                // List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                List<String> analysisResults = new ArrayList<>();
                 int j = 0;
                 for (String words : analysisResults) {
                     if (dictionaryConfigs.contains(words)) {
@@ -135,7 +136,9 @@ public class NewVersionDocServiceImpl implements DocService {
                             XWPFRun newRun = xp.createRun();
                             int i = 1;
                             String text = replaceSpecialSymbol(xp.getText(), symbols, "");
-                            List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                            //List<String> analysisResults = analysisService.getIkSmartAnalysisWords(text);
+                            List<String> analysisResults = new ArrayList<>();
+
                             // log.error(text);
                             int j = 0;
                             for (String words : analysisResults) {
@@ -378,7 +381,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
                                         String startOfOnlyCode = getStartOfCode(onlyCode);
-                                        log.error(startOfOnlyCode);
+                                        // log.error(startOfOnlyCode);
                                         if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                 && onlyCode.equals(startOfFullCode)) {
                                             adviceCode = fullCode;
@@ -578,16 +581,16 @@ public class NewVersionDocServiceImpl implements DocService {
                                             onlyCode = onlyCode.replaceAll("》", "");
 
                                             //此处暂时省略对照先验证提取
-                                            if (!rulesService.queryFullCodesSet().contains(temp)) {
+                                            if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
 
 
                                                 String adviceCode = "";
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
                                                     String startOfOnlyCode = getStartOfCode(onlyCode);
-                                                    log.error(startOfOnlyCode);
+                                                    // log.error(startOfOnlyCode);
                                                     if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
-                                                            && onlyCode.equals(startOfFullCode)) {
+                                                            && onlyCode.contains(startOfFullCode)) {
                                                         adviceCode = fullCode;
                                                     }
                                                 }

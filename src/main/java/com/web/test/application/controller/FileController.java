@@ -95,7 +95,7 @@ public class FileController {
             * ik模式暂时弃用
             * */
             if (dealModel.equals("ik")) {
-                newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
+                //newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
             } else if (dealModel.equals("regx")) {
                 /*利用正则方式提取并比对*/
                 newVersionDocService.checkRuluesOfTextRegx(FILE_PATH + deleteFileName, tempFilePath);

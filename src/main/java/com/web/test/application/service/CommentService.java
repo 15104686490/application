@@ -49,15 +49,19 @@ public class CommentService {
             Page page = PageHelper.startPage(currentPage, pageSize);
             list = baseMapper.queryComments();
             PageInfo info = new PageInfo<>(page.getResult());
-            int totals = (int)info.getTotal();
+            int totals = (int) info.getTotal();
             int pages = info.getPages();
             int curPage = info.getPageNum();
+            for (int i = 0; i < list.size(); i++) {
+                int l = list.get(0).getCommentId().length();
+                list.get(i).setUserId(Long.parseLong(list.get(i).getCommentId().substring(l - 4, l-1)));
+            }
             /*log.error(info.getPageNum()+"");*/
             PageResult pageResult = new PageResult(list, 200, curPage, pages,
                     pageQuery.getPageCapacity(), "ok", totals);
             return pageResult;
         } catch (Exception e) {
-            /*e.printStackTrace();*/
+            e.printStackTrace();
             log.error("query comments error !!!! " + e.getMessage());
         }
         return null;
