@@ -8,6 +8,7 @@ import com.web.test.application.model.CheckResultSingleton;
 import com.web.test.application.model.CollectRuleSingleton;
 import com.web.test.application.test.PatternUtil;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.openxml4j.util.ZipSecureFile;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
@@ -247,7 +248,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 List<String> textList = Arrays.asList(text.split("。"));
 
                 for (String str : textList) {
-                    LinkedHashSet<String> paragraphResult = new LinkedHashSet();
+                    LinkedHashMap<String, String> paragraphResult = new LinkedHashMap<>();
                     boolean f = false;
                     /*完整规范名称*/
                     for (Pattern p : langConfigsPattern) {
@@ -257,6 +258,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                             String onlyStringTemp = temp;
                             // String onlyCode = "";
+                            //onlyStringTemp = onlyStringTemp.replaceAll(" ", "");
                             onlyStringTemp = onlyStringTemp.replaceAll("（", "");
                             onlyStringTemp = onlyStringTemp.replaceAll("）", "");
                             onlyStringTemp = onlyStringTemp.replaceAll("《", "");
@@ -264,7 +266,8 @@ public class NewVersionDocServiceImpl implements DocService {
                             /*处理完整的标准*/
                             if (!rulesService.queryFullNameList().contains(onlyStringTemp)) {
                                 i++;
-                                paragraphResult.add(temp);
+                                String md5OfTemp = getMd5OfString(temp);
+                                paragraphResult.put(md5OfTemp, temp);
                                 boolean flag = totalResult.add(temp);
                                 if (flag) {
                                     resultList.add(temp);
@@ -307,6 +310,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                     }
                                 }
+                                boolean timeError = false;
                                 if (!codeFlag) {
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
@@ -314,12 +318,15 @@ public class NewVersionDocServiceImpl implements DocService {
                                         if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                 && onlyString.contains(startOfFullCode)) {
                                             adviceCode = fullCode;
+                                            timeError = true;
                                         }
                                     }
                                 }
+                                String adviceCNName = "";
                                 for (String onlyCn : rulesService.queryCNNameSet()) {
-                                    if (onlyString.contains(onlyCn)) {
+                                    if (onlyString.startsWith(onlyCn)) {
                                         cnFlag = true;
+                                        adviceCNName = onlyCn;
                                         break;
                                     } else {
 
@@ -335,18 +342,46 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }
                                 }
 
+                                String adviceOfCNName = "";
+                                if ((codeFlag) && (cnFlag)) {
+                                    for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
+                                        if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
+                                            adviceOfCNName = tempFullRule;
+                                            break;
+                                        }
+                                    }
+                                }
+
                                 String reason = "";
                                 if ((codeFlag) && (!cnFlag)) {
                                     reason = "标准存在问题，请重点检查标准的名称部分";
                                 } else if ((!codeFlag) && (cnFlag)) {
                                     reason = "标准存在问题，请重点检查标准的编码部分";
+                                    if (timeError) {
+                                        reason = reason + "，编码中时间部分存在问题";
+                                    }
                                 } else {
-                                    reason = "标准存在问题请检查";
+                                    if (!advice.equals("") && timeError && cnFlag) {
+                                        reason = "标准存在问题，请重点检查标准的编码部分";
+                                        reason = reason + "，编码中时间部分存在问题";
+                                    } else if (!advice.equals("") && timeError) {
+                                        reason = "标准的名称和编码都存在问题";
+                                        reason = reason + "，其中编码时间部分存在问题";
+                                    } else if (codeFlag && (!cnFlag)) {
+                                        reason = "标准存在问题，请重点检查标准的名称部分";
+                                    } else if(codeFlag && cnFlag){
+                                        reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
+                                        if(!adviceOfCNName.equals("")) {
+                                            reason = reason + "，可参考标准：" + adviceOfCNName;
+                                        }
+                                    }else {
+                                        reason = "标准存在问题请检查，当前库中未检索到此标准";
+                                    }
                                 }
                                 if (!advice.equals("")) {
                                     reason = reason + "，可参考标准：" + advice;
                                 }
-                                CheckResultSingleton singleton = new CheckResultSingleton(temp, reason);
+                                CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
 
                                 if (flag) {
                                     resultSingletonList.add(singleton);
@@ -377,6 +412,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 //此处暂时省略对照先验证提取
                                 if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
 
+                                    String md5OfTemp = getMd5OfString(temp);
                                     String adviceCode = "";
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
@@ -399,7 +435,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                         }
                                     }
                                     i++;
-                                    paragraphResult.add(temp);
+                                    paragraphResult.put(md5OfTemp, temp);
                                     RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                     if (totalResult.add(temp)) {
                                         String reason = "引用标准编码存在问题请检查";
@@ -407,7 +443,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             reason = reason + "，可参考标准：" + advice;
                                         }
                                         // boolean errorOfCode = false;
-                                        CheckResultSingleton singleton = new CheckResultSingleton(temp, reason);
+                                        CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                         resultSingletonList.add(singleton);
                                         resultList.add(temp);
                                     }
@@ -426,14 +462,20 @@ public class NewVersionDocServiceImpl implements DocService {
                     newRun.setColor(newTextColor);
                     int j = 1;
                     /*控制段尾输出*/
-                    //endPrintOfParagraph = ConfigUtil.getBooleanConfig("paragraph_end_print_flag");
+
                     if (endPrintOfParagraph) {
-                        for (String pr : paragraphResult) {
+                       /* for (String pr : paragraphResult) {
 
                             newRun.setText(j + ". " + pr);
                             newRun.addBreak();
                             j++;
-                        }
+                        }*/
+                        paragraphResult.forEach((k, v) -> {
+                            // newRun.setText(v + "：" + k);
+                            newRun.setText(v);
+                            newRun.addBreak();
+                            //j++;
+                        });
                     } else {
                         /*log.info("");*/
                     }
@@ -456,7 +498,7 @@ public class NewVersionDocServiceImpl implements DocService {
                             List<String> textList = Arrays.asList(text.split("。"));
                             for (String str : textList) {
                                 boolean f = false;
-                                TreeSet<String> paragraphResult = new TreeSet();
+                                TreeMap<String, String> paragraphResult = new TreeMap<>();
                                 for (Pattern p : langConfigsPattern) {
                                     Matcher matcher = p.matcher(str);
                                     /*log.error();*/
@@ -466,7 +508,9 @@ public class NewVersionDocServiceImpl implements DocService {
                                         //此处暂时省略对照先验证提取
                                         if (!rulesService.queryFullNameList().contains(temp)) {
                                             i++;
-                                            paragraphResult.add(temp);
+
+                                            String md5OfTemp = getMd5OfString(temp);
+                                            paragraphResult.put(md5OfTemp, temp);
                                             boolean flag = totalResult.add(temp);
                                             if (flag) {
                                                 resultList.add(temp);
@@ -552,7 +596,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (!advice.equals("")) {
                                                 reason = reason + "，可参考标准：" + advice;
                                             }
-                                            CheckResultSingleton singleton = new CheckResultSingleton(temp, reason);
+                                            CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
 
                                             if (flag) {
                                                 resultSingletonList.add(singleton);
@@ -584,6 +628,8 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
 
 
+                                                String md5OfTemp = getMd5OfString(temp);
+                                                paragraphResult.put(md5OfTemp, temp);
                                                 String adviceCode = "";
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
@@ -606,7 +652,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 }
 
                                                 i++;
-                                                paragraphResult.add(temp);
+                                                paragraphResult.put(md5OfTemp, temp);
                                                 RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
 
                                                 String reason = "引用标准编码存在问题请检查";
@@ -619,7 +665,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
-                                                    CheckResultSingleton singleton = new CheckResultSingleton(temp, reason);
+                                                    CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                                     resultSingletonList.add(singleton);
                                                 }
 
@@ -643,12 +689,13 @@ public class NewVersionDocServiceImpl implements DocService {
                                             // log.error(temp);
                                             if (!rulesService.queryCNNameSet().contains(temp)) {
                                                 i++;
-                                                paragraphResult.add(temp);
+                                                String md5OfTemp = getMd5OfString(temp);
+                                                paragraphResult.put(md5OfTemp, temp);
                                                 RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
                                                     String reason = "引用标准名称存在问题请检查";
-                                                    CheckResultSingleton singleton = new CheckResultSingleton(temp, reason);
+                                                    CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                                     resultSingletonList.add(singleton);
                                                 }
                                             } else {
@@ -668,11 +715,21 @@ public class NewVersionDocServiceImpl implements DocService {
                                 int j = 1;
                                 /*控制段尾的输出*/
                                 if (endPrintOfParagraph) {
-                                    for (String pr : paragraphResult) {
+                                    /*if (paragraphResult.size() > 0) {
+                                        newRun.setText(""+"：");
+                                        newRun.addBreak();
+                                    }*/
+                                    /*for (String pr : paragraphResult) {
                                         newRun.setText(j + ". " + pr);
                                         newRun.addBreak();
                                         j++;
-                                    }
+                                    }*/
+                                    paragraphResult.forEach((k, v) -> {
+                                        // newRun.setText(v + "：" + k);
+                                        newRun.setText(v);
+                                        newRun.addBreak();
+                                        //j++;
+                                    });
                                 } else {
                                 }
                             }
@@ -700,6 +757,8 @@ public class NewVersionDocServiceImpl implements DocService {
                 }*/
 
                 for (CheckResultSingleton singleton : resultSingletonList) {
+                    /*String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason() + "，"
+                            + "可在文中搜索问题标识  " + singleton.getMd5OfString();*/
                     String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason();
                     newRun.setText(singletonOut);
                     newRun.addBreak();
@@ -786,5 +845,14 @@ public class NewVersionDocServiceImpl implements DocService {
             res = "*";
         }
         return res;
+    }
+
+    public String getMd5OfString(String txtValue) {
+        if (txtValue != null) {
+            String res = DigestUtils.md5Hex(txtValue);
+            return res;
+        } else {
+            return "*";
+        }
     }
 }

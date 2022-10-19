@@ -28,4 +28,8 @@ public class CheckResultSingleton {
      * 原因
      */
     String reason;
+
+
+
+    String md5OfString;
 }
