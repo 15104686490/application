@@ -196,12 +196,12 @@ public class NewVersionDocServiceImpl implements DocService {
         XWPFParagraph first;
         HashSet<String> langConfigs = new HashSet<>();
         HashSet<String> shortConfigs = new HashSet<>();
-        HashSet<String> codeConfigs = new HashSet<>();
+        LinkedHashSet<String> codeConfigs = new LinkedHashSet<>();
         List<String> textSymbol = new ArrayList<>();
         List<String> Symbols = new ArrayList<>();
-        HashSet<Pattern> langConfigsPattern = new HashSet<>();
-        HashSet<Pattern> shortConfigsPattern = new HashSet<>();
-        HashSet<Pattern> codeConfigsPattern = new HashSet<>();
+        LinkedHashSet<Pattern> langConfigsPattern = new LinkedHashSet<>();
+        LinkedHashSet<Pattern> shortConfigsPattern = new LinkedHashSet<>();
+        LinkedHashSet<Pattern> codeConfigsPattern = new LinkedHashSet<>();
         boolean endPrintOfParagraph = false;
         endPrintOfParagraph = ConfigUtil.getBooleanConfig("paragraph_end_print_flag");
         langConfigs.addAll(ConfigUtil.getStringConfigList("lang_rules_configs"));
@@ -358,15 +358,15 @@ public class NewVersionDocServiceImpl implements DocService {
                                 } else if ((!codeFlag) && (cnFlag)) {
                                     reason = "标准存在问题，请重点检查标准的编码部分";
                                     if (timeError) {
-                                        reason = reason + "，编码中时间部分存在问题";
+                                        reason = reason + "，编码中时间或使用符号存在问题";
                                     }
                                 } else {
                                     if (!advice.equals("") && timeError && cnFlag) {
                                         reason = "标准存在问题，请重点检查标准的编码部分";
-                                        reason = reason + "，编码中时间部分存在问题";
+                                        reason = reason + "，编码中时间或使用符号存在问题";
                                     } else if (!advice.equals("") && timeError) {
                                         reason = "标准的名称和编码都存在问题";
-                                        reason = reason + "，其中编码时间部分存在问题";
+                                        reason = reason + "，其中编码时间或使用符号存在问题";
                                     } else if (codeFlag && (!cnFlag)) {
                                         reason = "标准存在问题，请重点检查标准的名称部分";
                                     } else if(codeFlag && cnFlag){
@@ -505,8 +505,16 @@ public class NewVersionDocServiceImpl implements DocService {
                                     while (matcher.find()) {
                                         String temp = matcher.group();
 
+                                        String onlyStringTemp = temp;
+                                        // String onlyCode = "";
+                                        //onlyStringTemp = onlyStringTemp.replaceAll(" ", "");
+                                        onlyStringTemp = onlyStringTemp.replaceAll("（", "");
+                                        onlyStringTemp = onlyStringTemp.replaceAll("）", "");
+                                        onlyStringTemp = onlyStringTemp.replaceAll("《", "");
+                                        onlyStringTemp = onlyStringTemp.replaceAll("》", "");
+
                                         //此处暂时省略对照先验证提取
-                                        if (!rulesService.queryFullNameList().contains(temp)) {
+                                        if (!rulesService.queryFullNameList().contains(onlyStringTemp)) {
                                             i++;
 
                                             String md5OfTemp = getMd5OfString(temp);
@@ -524,10 +532,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                             boolean cnFlag = false;
                                             String onlyString = temp;
                                             String onlyCode = "";
-                                            onlyString.replaceAll("（", "");
-                                            onlyString.replaceAll("）", "");
-                                            onlyString.replaceAll("《", "");
-                                            onlyString.replaceAll("》", "");
+                                            onlyString = onlyString.replaceAll("（", "");
+                                            onlyString = onlyString.replaceAll("）", "");
+                                            onlyString = onlyString.replaceAll("《", "");
+                                            onlyString = onlyString.replaceAll("》", "");
 
                                 /*for (Pattern pcode : codeConfigsPattern) {
                                     Matcher matcherCode = p.matcher(str);
@@ -555,7 +563,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                                 }
                                             }
-
+                                            boolean timeError = false;
                                             if (!codeFlag) {
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
@@ -563,13 +571,15 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                             && onlyString.contains(startOfFullCode)) {
                                                         adviceCode = fullCode;
+                                                        timeError = true;
                                                     }
                                                 }
                                             }
-
+                                            String adviceCNName = "";
                                             for (String onlyCn : rulesService.queryCNNameSet()) {
-                                                if (onlyString.contains(onlyCn)) {
+                                                if (onlyString.startsWith(onlyCn)) {
                                                     cnFlag = true;
+                                                    adviceCNName = onlyCn;
                                                     break;
                                                 } else {
 
@@ -585,13 +595,41 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 }
                                             }
 
+                                            String adviceOfCNName = "";
+                                            if ((codeFlag) && (cnFlag)) {
+                                                for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
+                                                    if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
+                                                        adviceOfCNName = tempFullRule;
+                                                        break;
+                                                    }
+                                                }
+                                            }
+
                                             String reason = "";
                                             if ((codeFlag) && (!cnFlag)) {
                                                 reason = "标准存在问题，请重点检查标准的名称部分";
                                             } else if ((!codeFlag) && (cnFlag)) {
                                                 reason = "标准存在问题，请重点检查标准的编码部分";
+                                                if (timeError) {
+                                                    reason = reason + "，编码中时间或使用符号存在问题";
+                                                }
                                             } else {
-                                                reason = "标准存在问题请检查";
+                                                if (!advice.equals("") && timeError && cnFlag) {
+                                                    reason = "标准存在问题，请重点检查标准的编码部分";
+                                                    reason = reason + "，编码中时间或使用符号存在问题";
+                                                } else if (!advice.equals("") && timeError && !cnFlag) {
+                                                    reason = "标准的名称和编码都存在问题";
+                                                    reason = reason + "，其中编码时间或使用符号存在问题";
+                                                } else if (codeFlag && (!cnFlag)) {
+                                                    reason = "标准存在问题，请重点检查标准的名称部分";
+                                                } else if(codeFlag && cnFlag){
+                                                    reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
+                                                    if(!adviceOfCNName.equals("")) {
+                                                        reason = reason + "，可参考标准：" + adviceOfCNName;
+                                                    }
+                                                }else {
+                                                    reason = "标准存在问题请检查，当前库中未检索到此标准";
+                                                }
                                             }
                                             if (!advice.equals("")) {
                                                 reason = reason + "，可参考标准：" + advice;
@@ -601,6 +639,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (flag) {
                                                 resultSingletonList.add(singleton);
                                             }
+
 
                                         } else {
 

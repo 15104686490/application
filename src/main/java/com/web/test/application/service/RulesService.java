@@ -410,7 +410,7 @@ public class RulesService {
         String name = pageQuery.getQueryName();
         if (types.size() == 1 && types.get(0).equals("all")) {
             for (RuleSingleton ruleSingleton : ruleSingletonsList) {
-                if (ruleSingleton.getFullName().contains(name)) {
+                if (ruleSingleton.getFullName().contains(name.replaceAll(" ", ""))) {
                     String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
                     ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
@@ -418,7 +418,7 @@ public class RulesService {
             }
         } else if (types.size() >= 1) {
             for (RuleSingleton ruleSingleton : ruleSingletonsList) {
-                if (ruleSingleton.getFullName().contains(name) && types.contains(ruleSingleton.getType())) {
+                if (ruleSingleton.getFullName().contains(name.replaceAll(" ", "")) && types.contains(ruleSingleton.getType())) {
                     String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
                     ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
@@ -526,9 +526,12 @@ public class RulesService {
             }
             RuleSingleton temp = new RuleSingleton(v, k, "《" + v + "》" + "（" + k + "）", type);
             RuleSingleton temp1 = new RuleSingleton(v, k, "《" + v + "（" + k + "）" + "》", type);
-            list.add(temp);
-            list.add(temp1);
+            if(!queryFullCodesSet().contains(temp.getFullCode())){
+                list.add(temp);
+                list.add(temp1);
+            }
         });
+        // List<RuleSingleton> res = new ArrayList<>();
         list.forEach(l -> {
             baseMapper.add(l);
             System.out.println(l.toString());
