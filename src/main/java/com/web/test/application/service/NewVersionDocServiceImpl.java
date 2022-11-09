@@ -311,14 +311,18 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }
                                 }
                                 boolean timeError = false;
+                               // int maxLength = 0;
                                 if (!codeFlag) {
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
                                         /*log.error(startOfFullCode);*/
                                         if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                 && onlyString.contains(startOfFullCode)) {
-                                            adviceCode = fullCode;
-                                            timeError = true;
+                                            //if (startOfFullCode.length() > maxLength) {
+                                                adviceCode = fullCode;
+                                            //    maxLength = startOfFullCode.length();
+                                                timeError = true;
+                                           // }
                                         }
                                     }
                                 }
@@ -369,12 +373,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                         reason = reason + "，其中编码时间或使用符号存在问题";
                                     } else if (codeFlag && (!cnFlag)) {
                                         reason = "标准存在问题，请重点检查标准的名称部分";
-                                    } else if(codeFlag && cnFlag){
+                                    } else if (codeFlag && cnFlag) {
                                         reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
-                                        if(!adviceOfCNName.equals("")) {
+                                        if (!adviceOfCNName.equals("")) {
                                             reason = reason + "，可参考标准：" + adviceOfCNName;
                                         }
-                                    }else {
+                                    } else {
                                         reason = "标准存在问题请检查，当前库中未检索到此标准";
                                     }
                                 }
@@ -409,9 +413,11 @@ public class NewVersionDocServiceImpl implements DocService {
                                 onlyCode = onlyCode.replaceAll("《", "");
                                 onlyCode = onlyCode.replaceAll("》", "");
 
+
                                 //此处暂时省略对照先验证提取
                                 if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
 
+                                   // int maxLength = 0;
                                     String md5OfTemp = getMd5OfString(temp);
                                     String adviceCode = "";
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
@@ -420,7 +426,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                         // log.error(startOfOnlyCode);
                                         if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                 && onlyCode.equals(startOfFullCode)) {
-                                            adviceCode = fullCode;
+                                           // if (startOfFullCode.length() > maxLength) {
+                                                adviceCode = fullCode;
+                                            //    maxLength = startOfFullCode.length();
+                                           // }
                                         }
                                     }
 
@@ -563,6 +572,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                                 }
                                             }
+                                            //int maxLength = 0;
                                             boolean timeError = false;
                                             if (!codeFlag) {
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
@@ -570,8 +580,11 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     /*log.error(startOfFullCode);*/
                                                     if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                             && onlyString.contains(startOfFullCode)) {
-                                                        adviceCode = fullCode;
-                                                        timeError = true;
+                                                        //if (startOfFullCode.length() > maxLength) {
+                                                            adviceCode = fullCode;
+                                                            timeError = true;
+                                                           // maxLength = startOfFullCode.length();
+                                                       // }
                                                     }
                                                 }
                                             }
@@ -622,12 +635,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     reason = reason + "，其中编码时间或使用符号存在问题";
                                                 } else if (codeFlag && (!cnFlag)) {
                                                     reason = "标准存在问题，请重点检查标准的名称部分";
-                                                } else if(codeFlag && cnFlag){
+                                                } else if (codeFlag && cnFlag) {
                                                     reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
-                                                    if(!adviceOfCNName.equals("")) {
+                                                    if (!adviceOfCNName.equals("")) {
                                                         reason = reason + "，可参考标准：" + adviceOfCNName;
                                                     }
-                                                }else {
+                                                } else {
                                                     reason = "标准存在问题请检查，当前库中未检索到此标准";
                                                 }
                                             }
@@ -670,13 +683,17 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 String md5OfTemp = getMd5OfString(temp);
                                                 paragraphResult.put(md5OfTemp, temp);
                                                 String adviceCode = "";
+                                                //int maxLength = 0;
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
                                                     String startOfOnlyCode = getStartOfCode(onlyCode);
                                                     // log.error(startOfOnlyCode);
                                                     if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
                                                             && onlyCode.contains(startOfFullCode)) {
-                                                        adviceCode = fullCode;
+                                                        //if (startOfFullCode.length() > maxLength) {
+                                                            adviceCode = fullCode;
+                                                           // maxLength = startOfFullCode.length();
+                                                       // }
                                                     }
                                                 }
 
@@ -798,10 +815,12 @@ public class NewVersionDocServiceImpl implements DocService {
                 for (CheckResultSingleton singleton : resultSingletonList) {
                     /*String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason() + "，"
                             + "可在文中搜索问题标识  " + singleton.getMd5OfString();*/
-                    String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason();
-                    newRun.setText(singletonOut);
-                    newRun.addBreak();
-                    k++;
+                    if(!singleton.getTxtValue().equals("") && !singleton.getTxtValue().equals(" ")) {
+                        String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason();
+                        newRun.setText(singletonOut);
+                        newRun.addBreak();
+                        k++;
+                    }
                 }
             }
 

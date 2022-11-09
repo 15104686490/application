@@ -10,9 +10,26 @@ spring:
     multipart:
       max-file-size: 1024MB
       max-request-size: 1024MB
+  mail:
+    host: smtp.163.com
+    username: nidrgy_liang@163.com
+    password: FAENXDNYTDCRGXGF
+  redis:
+    database: 0
+    host: 127.0.0.1
+    port: 6379
+    jedis:
+      pool:
+        max-active: 100
+        max-idle: 20
+        min-idle: 5
+    timeout: 1500
+  session:
+    store-type: none
 pagehelper:
   helper-dialect: mysql
   reasonable: true
   support-methods-arguments: true
   params: count=countSql
+
 

@@ -7,9 +7,11 @@ package com.web.test.application.dao;
 import com.web.test.application.model.CollectRuleSingleton;
 import com.web.test.application.model.CommentSingleton;
 import com.web.test.application.model.RuleSingleton;
+import com.web.test.application.model.UserSingleton;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
+import org.apache.ibatis.annotations.Update;
 
 import java.util.List;
 
@@ -43,5 +45,17 @@ public interface BaseMapper {
 
     @Select("select comment_id, state, comment_value, user_id, create_time from comment order by create_time desc")
     public List<CommentSingleton> queryComments();
+
+    @Select("select user_name, password, mail_address from user where user_name = #{userName}")
+    public List<UserSingleton> queryUsersByUserName(String userName);
+
+    @Update("update user set password = #{password}, update_time = CURRENT_TIMESTAMP where user_name = #{userName}")
+    public int updatePassword(String userName, String password);
+
+    @Insert({"insert into user (user_name, password, mail_address) values (#{userName}, " +
+            "#{password}, #{mailAddress})"})
+    public int addNewUser(UserSingleton userSingleton);
+
+
 
 }

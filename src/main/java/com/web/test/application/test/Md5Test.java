@@ -7,7 +7,8 @@ import org.apache.commons.codec.digest.DigestUtils;
  */
 public class Md5Test {
     public static void main(String[] args) {
-        String str = DigestUtils.md5Hex("admin" + "fileName") + System.currentTimeMillis();
-        System.out.println(str);
+        /*String str = DigestUtils.md5Hex("admin" + "fileName") + System.currentTimeMillis();
+        System.out.println(str);*/
+        System.out.println(DigestUtils.md5Hex(""));
     }
 }
