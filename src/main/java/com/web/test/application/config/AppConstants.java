@@ -35,6 +35,11 @@ public class AppConstants {
     public final static int UPDATE_PASSWORD_SUCCESS = 20001;
 
     /**
+     * 邮箱验证成功
+     */
+    public final static int MAIL_VERIFY_SUCCESS = 20002;
+
+    /**
      * 用户信息存在空值
      */
     public final static int CLIENT_USER_INFO_NULL = 40010;
@@ -56,8 +61,28 @@ public class AppConstants {
      */
     public final static int CLIENT_USERNAME_REPEATABLE = 40013;
 
+
+    /**
+     * 邮箱已注册
+     */
+    public final static int CLIENT_MAIL_REPEATABLE = 40013;
+
     /**
      * 邮箱格式错误
      */
     public final static int CLIENT_USER_MAIl_ERROR = 40018;
+
+
+    /**
+     * 验证码发送对应场景：注册验证邮箱
+     */
+    public final static String GET_CODE_DEAL_TYPE_VERIFY = "0";
+
+
+    /**
+     * 验证码发送对应场景：密码找回
+     */
+    public final static String GET_CODE_DEAL_TYPE_UPDATE_PASSWORD = "1";
+
+
 }

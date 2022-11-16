@@ -29,6 +29,10 @@ public class UserService {
     @Autowired
     BaseMapper baseMapper;
 
+    /**
+     * @param user
+     * @return
+     */
     public ResultTest userLogin(UserVo user) {
         String userName = user.getUserName();
         String password = user.getPassword();
@@ -56,6 +60,10 @@ public class UserService {
         return new ResultTest<>(null, 200, "登录成功");
     }
 
+    /**
+     * @param user
+     * @return
+     */
     public ResultTest addNewUser(UserVo user) {
         String userName = user.getUserName();
         String password = user.getPassword();
@@ -75,11 +83,17 @@ public class UserService {
             return new ResultTest<>(null, AppConstants.CLIENT_USER_MAIl_ERROR, "邮箱格式存在问题");
         }
 
+
+
         baseMapper.addNewUser(new UserSingleton(userName, password, mailAddress));
         return new ResultTest<>(null, 200, "用户新增成功");
     }
 
 
+    /**
+     * @param email
+     * @return
+     */
     public boolean emailFormat(String email) {
 
         return Pattern.matches("^(\\w+([-.][A-Za-z0-9]+)*){3,18}@\\w+([-.][A-Za-z0-9]+)*\\.\\w+([-.][A-Za-z0-9]+)*$",

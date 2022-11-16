@@ -49,13 +49,14 @@ public interface BaseMapper {
     @Select("select user_name, password, mail_address from user where user_name = #{userName}")
     public List<UserSingleton> queryUsersByUserName(String userName);
 
+    @Select("select user_name, password, mail_address from user where mail_address = #{mailAddress}")
+    public List<UserSingleton> queryUsersByMailAddress(String mailAddress);
+
     @Update("update user set password = #{password}, update_time = CURRENT_TIMESTAMP where user_name = #{userName}")
     public int updatePassword(String userName, String password);
 
     @Insert({"insert into user (user_name, password, mail_address) values (#{userName}, " +
             "#{password}, #{mailAddress})"})
     public int addNewUser(UserSingleton userSingleton);
-
-
 
 }

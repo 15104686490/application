@@ -7,6 +7,9 @@ import org.springframework.stereotype.Component;
 import redis.clients.jedis.Jedis;
 import redis.clients.jedis.JedisPool;
 
+/**
+ * 提供操作redis缓存的工具方法
+ */
 @Slf4j
 @Component
 public class RedisBaseDao {
@@ -14,6 +17,10 @@ public class RedisBaseDao {
     @Autowired
     JedisPool jedisPool;
 
+    /**
+     * @param key
+     * @return
+     */
     public String get(String key) {
         Jedis jedis = null;
         String value = null;
@@ -31,6 +38,12 @@ public class RedisBaseDao {
     }
 
 
+    /**
+     * @param key
+     * @param expireTime
+     * @param value
+     * @return
+     */
     public String set(String key, int expireTime, String value) {
         Jedis jedis = null;
         try {
@@ -45,6 +58,10 @@ public class RedisBaseDao {
         return value;
     }
 
+    /**
+     * @param key
+     * @return
+     */
     public String expire(String key) {
         Jedis jedis = null;
         try {
