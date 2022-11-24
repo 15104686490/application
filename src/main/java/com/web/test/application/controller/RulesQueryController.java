@@ -136,9 +136,21 @@ public class RulesQueryController {
 
 
     @GetMapping("/getMethod")
-    public String insertMothod() {
+    public String insertMothod(@RequestParam String type) {
         // log.error("test post method...");
-        rulesService.getDataFromExcel("C:\\Users\\lzy15\\Desktop\\规范查询\\1015\\20221020.xls");
+        if(type == null|| type.isEmpty()){
+            type = "待分类";
+        }
+        rulesService.getDataFromExcel("C:\\updateExcel\\update.xls", type);
+        return "ok!!";
+    }
+
+
+    @GetMapping("/TxtFileMethod")
+    public String txtFileMothod() {
+        // log.error("test post method...");
+        // rulesService.getDataFromExcel("C:\\updateExcel\\update.xls");
+        rulesService.checkDataFromTxt("D:\\光伏加空格.txt");
         return "ok!!";
     }
 

@@ -19,8 +19,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.logging.LoggingSystem;
 import org.springframework.stereotype.Service;
 
-import java.io.File;
-import java.io.IOException;
+import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -70,7 +69,7 @@ public class RulesService {
         // res.addAll(hashSet);
         RULES_MAP.forEach((a, b) -> {
             // String temp = b.getFullName().replaceAll(" ", "");
-            String temp = "《"+b.getCnName()+"》"+"（"+b.getFullCode()+"）";
+            String temp = "《" + b.getCnName() + "》" + "（" + b.getFullCode() + "）";
             //res.add(b.getFullName().replaceAll(" ", ""));
             res.add(temp);
         });
@@ -470,7 +469,7 @@ public class RulesService {
         return null;
     }
 
-    public void getDataFromExcel(String path) {
+    public void getDataFromExcel(String path, String typeName) {
         //创建文件
         // File xlsFile = new File("C:\\Users\\lzy15\\Desktop\\规范查询\\标准名称添加汇总.xls");
         HashSet<String> set = new HashSet<>();
@@ -520,13 +519,14 @@ public class RulesService {
         }
         List<RuleSingleton> list = new ArrayList<>();
         map.forEach((k, v) -> {
-            String type = "待分类";
+            // String type = "风电";
+            String type = typeName;
             if (ruleTemp.get(k) != null) {
                 type = ruleTemp.get(k).getType();
             }
             RuleSingleton temp = new RuleSingleton(v, k, "《" + v + "》" + "（" + k + "）", type);
             RuleSingleton temp1 = new RuleSingleton(v, k, "《" + v + "（" + k + "）" + "》", type);
-            if(!queryFullCodesSet().contains(temp.getFullCode())){
+            if (!queryFullCodesSet().contains(temp.getFullCode())) {
                 list.add(temp);
                 list.add(temp1);
             }
@@ -537,6 +537,47 @@ public class RulesService {
             System.out.println(l.toString());
         });
         workbook.close();
+    }
+
+    public void checkDataFromTxt(String path) {
+        HashSet<String> set = isLegalMagicSquare(path);
+        HashSet<String> ruleTemp = new HashSet<>();
+        RULES_MAP.forEach((k, v) -> {
+            ruleTemp.add(v.getFullCode().replaceAll(" ", "")
+                    + v.getCnName().replaceAll(" ", ""));
+        });
+        set.forEach(a -> {
+            if (!ruleTemp.contains(a)) {
+                System.out.println(a);
+            }
+        });
+    }
+
+
+    public static HashSet<String> isLegalMagicSquare(String fileName) {
+        HashSet<String> res = new HashSet<>();
+        try {
+            File myFile = new File(fileName);
+            if (myFile.isFile() && myFile.exists()) {
+                InputStreamReader Reader = new InputStreamReader(new FileInputStream(myFile), "UTF-8");
+                BufferedReader bufferedReader = new BufferedReader(Reader);
+                String lineTxt = null;
+                while ((lineTxt = bufferedReader.readLine()) != null) {
+                    //System.out.println(lineTxt);
+                    res.add(lineTxt.replaceAll(" ", ""));
+                }
+                Reader.close();
+                return res;
+            } else {
+                System.out.println("找不到指定的文件");
+                return res;
+            }
+        } catch (Exception e) {
+            System.out.println("读取文件内容出错");
+            e.printStackTrace();
+            return res;
+        }
+
     }
 
 

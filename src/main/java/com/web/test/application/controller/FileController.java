@@ -57,7 +57,7 @@ public class FileController {
             log.error(appName + "为未授权服务");
             return null;
         }*/
-        if(!QueryRuleTask.RULES_FLAG){
+        if (!QueryRuleTask.RULES_FLAG) {
             log.error("服务未就绪");
             return null;
         }
@@ -81,7 +81,8 @@ public class FileController {
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
             String deleteFileName = fileService.storeFile(bytes, tempFileName);
-            String suffix = originalFilename.split("\\.")[1];
+            String[] suffixs = originalFilename.split("\\.");
+            String suffix = suffixs[suffixs.length - 1];
             /*目前支持对docx格式的处理，暂时没有支持老版本的doc格式*/
             //log.error(originalFilename);
             if (!suffix.equals("docx")) {
@@ -92,8 +93,8 @@ public class FileController {
             String tempFilePath = FILE_PATH + originalFilename.split("\\.")[0] + System.currentTimeMillis() + ".docx";
             File tempFile = new File(tempFilePath);
             /*按模式标识采用不同的处理逻辑，模式标识存储在nacos配置中心中，可以实时切换
-            * ik模式暂时弃用
-            * */
+             * ik模式暂时弃用
+             * */
             if (dealModel.equals("ik")) {
                 //newVersionDocService.checkRuluesOfText(FILE_PATH + deleteFileName, tempFilePath); //利用分词方式
             } else if (dealModel.equals("regx")) {

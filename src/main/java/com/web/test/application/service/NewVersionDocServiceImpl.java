@@ -187,18 +187,13 @@ public class NewVersionDocServiceImpl implements DocService {
      */
     @Override
     public String checkRuluesOfTextRegx(String oldPath, String newPath) {
-        /*if (flag) {
-            //rulesService.showFullCode();
-            // rulesService.insertRulesV2();
-            flag = false;
-        }*/
         ZipSecureFile.setMinInflateRatio(-1D);
         XWPFParagraph first;
         HashSet<String> langConfigs = new HashSet<>();
         HashSet<String> shortConfigs = new HashSet<>();
         LinkedHashSet<String> codeConfigs = new LinkedHashSet<>();
         List<String> textSymbol = new ArrayList<>();
-        List<String> Symbols = new ArrayList<>();
+        List<String> symbols = new ArrayList<>();
         LinkedHashSet<Pattern> langConfigsPattern = new LinkedHashSet<>();
         LinkedHashSet<Pattern> shortConfigsPattern = new LinkedHashSet<>();
         LinkedHashSet<Pattern> codeConfigsPattern = new LinkedHashSet<>();
@@ -207,6 +202,9 @@ public class NewVersionDocServiceImpl implements DocService {
         langConfigs.addAll(ConfigUtil.getStringConfigList("lang_rules_configs"));
         shortConfigs.addAll(ConfigUtil.getStringConfigList("p_set"));
         codeConfigs.addAll(ConfigUtil.getStringConfigList("code_configs"));
+        symbols.addAll(ConfigUtil.getStringConfigList("exclusion_symbols"));
+        boolean CN_FLAG = false;
+        CN_FLAG = ConfigUtil.getBooleanConfig("cn_flag");
 
         textSymbol.add("，");
         textSymbol.add("；");
@@ -255,14 +253,8 @@ public class NewVersionDocServiceImpl implements DocService {
                         Matcher matcher = p.matcher(str);
                         while (matcher.find()) {
                             String temp = matcher.group();
-
                             String onlyStringTemp = temp;
-                            // String onlyCode = "";
-                            //onlyStringTemp = onlyStringTemp.replaceAll(" ", "");
-                            onlyStringTemp = onlyStringTemp.replaceAll("（", "");
-                            onlyStringTemp = onlyStringTemp.replaceAll("）", "");
-                            onlyStringTemp = onlyStringTemp.replaceAll("《", "");
-                            onlyStringTemp = onlyStringTemp.replaceAll("》", "");
+                            onlyStringTemp = replaceSpecialSymbol(onlyStringTemp, symbols, "");
                             /*处理完整的标准*/
                             if (!rulesService.queryFullNameList().contains(onlyStringTemp)) {
                                 i++;
@@ -280,25 +272,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 boolean cnFlag = false;
                                 String onlyString = temp;
                                 String onlyCode = "";
-                                onlyString = onlyString.replaceAll("（", "");
-                                onlyString = onlyString.replaceAll("）", "");
-                                onlyString = onlyString.replaceAll("《", "");
-                                onlyString = onlyString.replaceAll("》", "");
-                                /*for (Pattern pcode : codeConfigsPattern) {
-                                    Matcher matcherCode = p.matcher(str);
-                                    while (matcherCode.find()) {
-                                        String tempCode = matcher.group();
-                                        if (!rulesService.queryFullCodesSet().contains(temp)) {
-                                            codeFlag = false;
-                                        } else {
-                                            codeFlag = true;
-                                            break;
-                                        }
-                                    }
-                                    if (codeFlag) {
-                                        break;
-                                    }
-                                }*/
+                                onlyString = replaceSpecialSymbol(onlyString, symbols, "");
                                 String adviceCode = "";
                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                     //String startOfCode = getStartOfCode(fullCode);
@@ -311,18 +285,19 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }
                                 }
                                 boolean timeError = false;
-                               // int maxLength = 0;
+                                // int maxLength = 0;
                                 if (!codeFlag) {
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
-                                        /*log.error(startOfFullCode);*/
-                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
-                                                && onlyString.contains(startOfFullCode)) {
+                                        String startOfOnlyString = getStartOfCode(onlyString);
+
+                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*") && (!startOfOnlyString.equals("*")))
+                                                && startOfOnlyString.endsWith(startOfFullCode)) {
                                             //if (startOfFullCode.length() > maxLength) {
-                                                adviceCode = fullCode;
-                                            //    maxLength = startOfFullCode.length();
-                                                timeError = true;
-                                           // }
+                                            adviceCode = fullCode;
+                                            // maxLength = startOfFullCode.length();
+                                            timeError = true;
+                                            // }
                                         }
                                     }
                                 }
@@ -395,7 +370,6 @@ public class NewVersionDocServiceImpl implements DocService {
 
                             }
                             f = true;
-                            // break;
                         }
                     }
                     /*编号*/
@@ -404,36 +378,23 @@ public class NewVersionDocServiceImpl implements DocService {
                         for (Pattern p : codeConfigsPattern) {
                             boolean codeFlag = false;
                             Matcher matcher = p.matcher(str);
-
                             while (matcher.find()) {
                                 String temp = matcher.group();
                                 String onlyCode = temp;
-                                onlyCode = onlyCode.replaceAll("（", "");
-                                onlyCode = onlyCode.replaceAll("）", "");
-                                onlyCode = onlyCode.replaceAll("《", "");
-                                onlyCode = onlyCode.replaceAll("》", "");
-
-
+                                onlyCode = replaceSpecialSymbol(onlyCode, symbols, "");
                                 //此处暂时省略对照先验证提取
                                 if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
-
-                                   // int maxLength = 0;
                                     String md5OfTemp = getMd5OfString(temp);
                                     String adviceCode = "";
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
                                         String startOfOnlyCode = getStartOfCode(onlyCode);
                                         // log.error(startOfOnlyCode);
-                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
-                                                && onlyCode.equals(startOfFullCode)) {
-                                           // if (startOfFullCode.length() > maxLength) {
-                                                adviceCode = fullCode;
-                                            //    maxLength = startOfFullCode.length();
-                                           // }
+                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*") && startOfOnlyCode.equals("*"))
+                                                && startOfOnlyCode.equals(startOfFullCode)) {
+                                            adviceCode = fullCode;
                                         }
                                     }
-
-
                                     String advice = "";
                                     if (!adviceCode.equals("")) {
                                         for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
@@ -451,7 +412,6 @@ public class NewVersionDocServiceImpl implements DocService {
                                         if (!advice.equals("")) {
                                             reason = reason + "，可参考标准：" + advice;
                                         }
-                                        // boolean errorOfCode = false;
                                         CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                         resultSingletonList.add(singleton);
                                         resultList.add(temp);
@@ -465,20 +425,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                 break;
                             }
                         }
-
                     }
                     newRun.setBold(isBold);
                     newRun.setColor(newTextColor);
                     int j = 1;
                     /*控制段尾输出*/
-
                     if (endPrintOfParagraph) {
-                       /* for (String pr : paragraphResult) {
-
-                            newRun.setText(j + ". " + pr);
-                            newRun.addBreak();
-                            j++;
-                        }*/
                         paragraphResult.forEach((k, v) -> {
                             // newRun.setText(v + "：" + k);
                             newRun.setText(v);
@@ -486,7 +438,6 @@ public class NewVersionDocServiceImpl implements DocService {
                             //j++;
                         });
                     } else {
-                        /*log.info("");*/
                     }
                 }
             }
@@ -499,7 +450,6 @@ public class NewVersionDocServiceImpl implements DocService {
                         List<XWPFParagraph> cellParagraphs = xwpfTableCell.getParagraphs();
                         for (XWPFParagraph xp : cellParagraphs) {
                             int i = 1;
-
                             XWPFRun newRun = xp.createRun();
                             // int i = 1;
                             String text = xp.getText().replaceAll(" ", "");
@@ -517,15 +467,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                         String onlyStringTemp = temp;
                                         // String onlyCode = "";
                                         //onlyStringTemp = onlyStringTemp.replaceAll(" ", "");
-                                        onlyStringTemp = onlyStringTemp.replaceAll("（", "");
-                                        onlyStringTemp = onlyStringTemp.replaceAll("）", "");
-                                        onlyStringTemp = onlyStringTemp.replaceAll("《", "");
-                                        onlyStringTemp = onlyStringTemp.replaceAll("》", "");
-
+                                        onlyStringTemp = replaceSpecialSymbol(onlyStringTemp, symbols, "");
                                         //此处暂时省略对照先验证提取
                                         if (!rulesService.queryFullNameList().contains(onlyStringTemp)) {
                                             i++;
-
                                             String md5OfTemp = getMd5OfString(temp);
                                             paragraphResult.put(md5OfTemp, temp);
                                             boolean flag = totalResult.add(temp);
@@ -541,26 +486,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             boolean cnFlag = false;
                                             String onlyString = temp;
                                             String onlyCode = "";
-                                            onlyString = onlyString.replaceAll("（", "");
-                                            onlyString = onlyString.replaceAll("）", "");
-                                            onlyString = onlyString.replaceAll("《", "");
-                                            onlyString = onlyString.replaceAll("》", "");
-
-                                /*for (Pattern pcode : codeConfigsPattern) {
-                                    Matcher matcherCode = p.matcher(str);
-                                    while (matcherCode.find()) {
-                                        String tempCode = matcher.group();
-                                        if (!rulesService.queryFullCodesSet().contains(temp)) {
-                                            codeFlag = false;
-                                        } else {
-                                            codeFlag = true;
-                                            break;
-                                        }
-                                    }
-                                    if (codeFlag) {
-                                        break;
-                                    }
-                                }*/
+                                            onlyString = replaceSpecialSymbol(onlyString, symbols, "");
                                             String adviceCode = "";
                                             for (String fullCode : rulesService.queryFullCodesSet()) {
                                                 //String startOfCode = getStartOfCode(fullCode);
@@ -577,14 +503,17 @@ public class NewVersionDocServiceImpl implements DocService {
                                             if (!codeFlag) {
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
-                                                    /*log.error(startOfFullCode);*/
+
+                                                    String startOfOnlyString = getStartOfCode(onlyString);
+
                                                     if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
-                                                            && onlyString.contains(startOfFullCode)) {
-                                                        //if (startOfFullCode.length() > maxLength) {
-                                                            adviceCode = fullCode;
-                                                            timeError = true;
-                                                           // maxLength = startOfFullCode.length();
-                                                       // }
+                                                            && (!startOfOnlyString.equals("*"))
+                                                            && startOfOnlyString.endsWith(startOfFullCode)) {
+
+                                                        adviceCode = fullCode;
+                                                        timeError = true;
+
+                                                        // }
                                                     }
                                                 }
                                             }
@@ -653,12 +582,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 resultSingletonList.add(singleton);
                                             }
 
-
                                         } else {
 
                                         }
                                         f = true;
-                                        // break;
 
                                     }
                                 }
@@ -669,13 +596,8 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                         while (matcher.find()) {
                                             String temp = matcher.group();
-
                                             String onlyCode = temp;
-                                            onlyCode = onlyCode.replaceAll("（", "");
-                                            onlyCode = onlyCode.replaceAll("）", "");
-                                            onlyCode = onlyCode.replaceAll("《", "");
-                                            onlyCode = onlyCode.replaceAll("》", "");
-
+                                            onlyCode = replaceSpecialSymbol(onlyCode, symbols, "");
                                             //此处暂时省略对照先验证提取
                                             if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
 
@@ -687,16 +609,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
                                                     String startOfOnlyCode = getStartOfCode(onlyCode);
-                                                    // log.error(startOfOnlyCode);
-                                                    if (adviceCode.equals("") && (!startOfFullCode.equals("*"))
-                                                            && onlyCode.contains(startOfFullCode)) {
-                                                        //if (startOfFullCode.length() > maxLength) {
-                                                            adviceCode = fullCode;
-                                                           // maxLength = startOfFullCode.length();
-                                                       // }
+
+                                                    if (adviceCode.equals("") && (!startOfFullCode.equals("*") && startOfOnlyCode.equals("*"))
+                                                            && startOfOnlyCode.equals(startOfFullCode)) {
+                                                        adviceCode = fullCode;
                                                     }
                                                 }
-
                                                 String advice = "";
                                                 if (!adviceCode.equals("")) {
                                                     for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
@@ -706,19 +624,13 @@ public class NewVersionDocServiceImpl implements DocService {
                                                         }
                                                     }
                                                 }
-
                                                 i++;
                                                 paragraphResult.put(md5OfTemp, temp);
                                                 RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
-
                                                 String reason = "引用标准编码存在问题请检查";
-
                                                 if (!advice.equals("")) {
                                                     reason = reason + "，可参考标准：" + advice;
                                                 }
-
-                                                //boolean errorOfCode = false;
-
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
                                                     CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
@@ -737,31 +649,33 @@ public class NewVersionDocServiceImpl implements DocService {
                                 }
 
                                 if (!f) {
-                                    boolean breakFlag = false;
-                                    for (Pattern p : shortConfigsPattern) {
-                                        Matcher matcher = p.matcher(str);
-                                        while (matcher.find()) {
-                                            String temp = matcher.group();
-                                            // log.error(temp);
-                                            if (!rulesService.queryCNNameSet().contains(temp)) {
-                                                i++;
-                                                String md5OfTemp = getMd5OfString(temp);
-                                                paragraphResult.put(md5OfTemp, temp);
-                                                RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
-                                                if (totalResult.add(temp)) {
-                                                    resultList.add(temp);
-                                                    String reason = "引用标准名称存在问题请检查";
-                                                    CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
-                                                    resultSingletonList.add(singleton);
+
+                                    if(CN_FLAG) {
+                                        boolean breakFlag = false;
+                                        for (Pattern p : shortConfigsPattern) {
+                                            Matcher matcher = p.matcher(str);
+                                            while (matcher.find()) {
+                                                String temp = matcher.group();
+                                                if (!rulesService.queryCNNameSet().contains(temp)) {
+                                                    i++;
+                                                    String md5OfTemp = getMd5OfString(temp);
+                                                    paragraphResult.put(md5OfTemp, temp);
+                                                    RulesService.insertCollectRule(new CollectRuleSingleton(temp, System.currentTimeMillis() + ""));
+                                                    if (totalResult.add(temp)) {
+                                                        resultList.add(temp);
+                                                        String reason = "引用标准名称存在问题请检查";
+                                                        CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
+                                                        resultSingletonList.add(singleton);
+                                                    }
+                                                } else {
+                                                    f = true;
+                                                    breakFlag = true;
+                                                    break;
                                                 }
-                                            } else {
-                                                f = true;
-                                                breakFlag = true;
+                                            }
+                                            if (breakFlag) {
                                                 break;
                                             }
-                                        }
-                                        if (breakFlag) {
-                                            break;
                                         }
                                     }
                                 }
@@ -815,7 +729,7 @@ public class NewVersionDocServiceImpl implements DocService {
                 for (CheckResultSingleton singleton : resultSingletonList) {
                     /*String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason() + "，"
                             + "可在文中搜索问题标识  " + singleton.getMd5OfString();*/
-                    if(!singleton.getTxtValue().equals("") && !singleton.getTxtValue().equals(" ")) {
+                    if (!singleton.getTxtValue().equals("") && !singleton.getTxtValue().equals(" ")) {
                         String singletonOut = k + "." + singleton.getTxtValue() + "：" + singleton.getReason();
                         newRun.setText(singletonOut);
                         newRun.addBreak();
