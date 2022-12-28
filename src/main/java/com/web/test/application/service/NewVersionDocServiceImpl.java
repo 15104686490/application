@@ -16,6 +16,7 @@ import org.apache.poi.xwpf.usermodel.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import javax.swing.text.html.parser.Entity;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -205,11 +206,9 @@ public class NewVersionDocServiceImpl implements DocService {
         symbols.addAll(ConfigUtil.getStringConfigList("exclusion_symbols"));
         boolean CN_FLAG = false;
         CN_FLAG = ConfigUtil.getBooleanConfig("cn_flag");
-
         textSymbol.add("，");
         textSymbol.add("；");
         // textSymbol.add("、");
-
 
         for (String str : langConfigs) {
             Pattern pattern = Pattern.compile(str);
@@ -223,18 +222,15 @@ public class NewVersionDocServiceImpl implements DocService {
             Pattern pattern = Pattern.compile(str);
             codeConfigsPattern.add(pattern);
         }
-
+        ArrayList<CheckResultSingleton> resultSingletonList1 = new ArrayList<>();
         boolean isBold = Boolean.valueOf(ConfigUtil.getStringConfig("text_bold_flag"));
         String newTextColor = ConfigUtil.getStringConfig("new_text_color");
         try {
-            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
-                    .openPackage(oldPath));
+            XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument.openPackage(oldPath));
             XWPFDocument doc = docx.getDocument();
             List<XWPFParagraph> paragraph = doc.getParagraphs();// doc中段落
             HashSet<String> totalResult = new HashSet<>();
-
             ArrayList<CheckResultSingleton> resultSingletonList = new ArrayList<>();
-
             ArrayList<String> resultList = new ArrayList<>();
             for (XWPFParagraph xp : paragraph) {
 
@@ -390,7 +386,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                         String startOfFullCode = getStartOfCode(fullCode);
                                         String startOfOnlyCode = getStartOfCode(onlyCode);
                                         // log.error(startOfOnlyCode);
-                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*") && startOfOnlyCode.equals("*"))
+                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*") && !startOfOnlyCode.equals("*"))
                                                 && startOfOnlyCode.equals(startOfFullCode)) {
                                             adviceCode = fullCode;
                                         }
@@ -411,6 +407,8 @@ public class NewVersionDocServiceImpl implements DocService {
                                         String reason = "引用标准编码存在问题请检查";
                                         if (!advice.equals("")) {
                                             reason = reason + "，可参考标准：" + advice;
+                                        } else {
+                                            reason = reason + "，且未在当前系统库中查找到相似的标准。";
                                         }
                                         CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                         resultSingletonList.add(singleton);
@@ -433,7 +431,7 @@ public class NewVersionDocServiceImpl implements DocService {
                     if (endPrintOfParagraph) {
                         paragraphResult.forEach((k, v) -> {
                             // newRun.setText(v + "：" + k);
-                            newRun.setText(v);
+                            newRun.setText("*" + v);
                             newRun.addBreak();
                             //j++;
                         });
@@ -553,7 +551,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             } else if ((!codeFlag) && (cnFlag)) {
                                                 reason = "标准存在问题，请重点检查标准的编码部分";
                                                 if (timeError) {
-                                                    reason = reason + "，编码中时间或使用符号存在问题";
+                                                    reason = reason + "，标准编码中时间或使用符号存在问题";
                                                 }
                                             } else {
                                                 if (!advice.equals("") && timeError && cnFlag) {
@@ -610,7 +608,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     String startOfFullCode = getStartOfCode(fullCode);
                                                     String startOfOnlyCode = getStartOfCode(onlyCode);
 
-                                                    if (adviceCode.equals("") && (!startOfFullCode.equals("*") && startOfOnlyCode.equals("*"))
+                                                    if (adviceCode.equals("") && (!startOfFullCode.equals("*") && !startOfOnlyCode.equals("*"))
                                                             && startOfOnlyCode.equals(startOfFullCode)) {
                                                         adviceCode = fullCode;
                                                     }
@@ -630,6 +628,8 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 String reason = "引用标准编码存在问题请检查";
                                                 if (!advice.equals("")) {
                                                     reason = reason + "，可参考标准：" + advice;
+                                                } else {
+                                                    reason = reason + "，且未在当前系统库中查找到相似的标准。";
                                                 }
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);
@@ -650,7 +650,7 @@ public class NewVersionDocServiceImpl implements DocService {
 
                                 if (!f) {
 
-                                    if(CN_FLAG) {
+                                    if (CN_FLAG) {
                                         boolean breakFlag = false;
                                         for (Pattern p : shortConfigsPattern) {
                                             Matcher matcher = p.matcher(str);
@@ -696,12 +696,13 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }*/
                                     paragraphResult.forEach((k, v) -> {
                                         // newRun.setText(v + "：" + k);
-                                        newRun.setText(v);
+                                        newRun.setText("*" + v);
                                         newRun.addBreak();
                                         //j++;
                                     });
                                 } else {
                                 }
+
                             }
                         }
                     }
@@ -736,6 +737,7 @@ public class NewVersionDocServiceImpl implements DocService {
                         k++;
                     }
                 }
+                resultSingletonList1 = resultSingletonList;
             }
 
             File tempFile = new File(newPath);
@@ -744,6 +746,12 @@ public class NewVersionDocServiceImpl implements DocService {
             stream.close();
             doc.close();
             docx.close();
+            if (resultSingletonList1.size() > 0) {
+                for (CheckResultSingleton singleton : resultSingletonList) {
+                    addComments("C:/python-code/", "pythondocx6.py", newPath,
+                            "*" + singleton.getTxtValue(), singleton.getReason());
+                }
+            }
         } catch (Exception e) {
             log.error("检查docx文件中标准时出现异常");
             e.printStackTrace();
@@ -826,5 +834,28 @@ public class NewVersionDocServiceImpl implements DocService {
         } else {
             return "*";
         }
+    }
+
+    public void addComments(String pythonPath, String pythonFileName, String docxFileName,
+                            String txtString, String commentsTxt) {
+
+        int processResult = 0;
+        try {
+            String[] argg = new String[]{"python", pythonPath + pythonFileName,
+                    docxFileName, txtString, commentsTxt};
+            Process process = Runtime.getRuntime().exec(argg);
+            processResult = process.waitFor();
+        } catch (Exception e) {
+            // throw new RuntimeException(e);
+            log.error("python批注程序执行异常 " + e.getMessage());
+        } finally {
+            if (processResult == 0) {
+                log.info("python批注程序执行成功 " + "程序执行结果码为 " + processResult);
+            } else {
+                log.info("python批注 " + "程序执行结果码为 " + processResult);
+            }
+        }
+
+
     }
 }

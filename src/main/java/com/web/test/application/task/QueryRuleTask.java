@@ -1,5 +1,6 @@
 package com.web.test.application.task;
 
+import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.dao.BaseMapper;
 import com.web.test.application.model.CollectRuleSingleton;
@@ -7,6 +8,7 @@ import com.web.test.application.model.RuleSingleton;
 import com.web.test.application.service.RulesService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,10 @@ public class QueryRuleTask {
 
 
 
+
+
+
+
     /*@Scheduled(cron = "0 0/5 * * * ? ")
     public void test() {
         log.error("两秒一次");
@@ -42,6 +48,7 @@ public class QueryRuleTask {
     public void updateMap() {
         boolean executeFlag = true;
         executeFlag = ConfigUtil.getBooleanConfig("execute_flag");
+
         if (executeFlag) {
             try {
                 log.error("更新规范Map");
@@ -80,6 +87,7 @@ public class QueryRuleTask {
     public void updataCollectRules() {
         boolean executeFlag = true;
         executeFlag = ConfigUtil.getBooleanConfig("execute_flag");
+
         if (executeFlag) {
             try {
                 log.error("更新Collect Rules Map");

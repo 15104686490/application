@@ -150,7 +150,7 @@ public class RulesQueryController {
     public String txtFileMothod() {
         // log.error("test post method...");
         // rulesService.getDataFromExcel("C:\\updateExcel\\update.xls");
-        rulesService.checkDataFromTxt("D:\\光伏加空格.txt");
+        rulesService.checkDataFromTxt("D:\\新增标准1125.txt");
         return "ok!!";
     }
 

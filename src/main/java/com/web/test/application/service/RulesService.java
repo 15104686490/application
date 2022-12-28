@@ -23,6 +23,7 @@ import java.io.*;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
+import java.util.stream.Collectors;
 
 /**
  * 规则操作service
@@ -359,7 +360,8 @@ public class RulesService {
         List<RuleSingleton> rulesList = new ArrayList<>();
         HashSet<String> hashSet = new HashSet<>();
 
-        for (RuleSingleton ruleSingleton : baseMapper.queryRulesListWithType()) {
+        // baseMapper.queryRulesListWithType()
+        for (RuleSingleton ruleSingleton : RULES_MAP.values()) {
             if (hashSet.add(ruleSingleton.getFullCode())) {
                 rulesList.add(ruleSingleton);
             }
@@ -435,6 +437,7 @@ public class RulesService {
         if (mod > 0) {
             totalPages++;
         }
+        list = list.stream().sorted(Comparator.comparing(RuleSingleton::getType)).collect(Collectors.toList());
         if (ruleCount <= pageCapacity) {
             PageResult res = new PageResult(list, 200, 1, 1, pageCapacity, "", ruleCount);
             return res;
@@ -453,6 +456,7 @@ public class RulesService {
             for (int i = startCount; i < ruleCount; i++) {
                 temp.add(list.get(i));
             }
+            //temp = temp.stream().sorted(Comparator.comparing(RuleSingleton::getType)).collect(Collectors.toList());
             PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "", ruleCount);
             return res;
         }
@@ -463,6 +467,7 @@ public class RulesService {
             for (int i = startCount; i < startCount + pageCapacity; i++) {
                 temp.add(list.get(i));
             }
+            //temp = temp.stream().sorted(Comparator.comparing(RuleSingleton::getType)).collect(Collectors.toList());
             PageResult res = new PageResult(temp, 200, currentPage, totalPages, pageCapacity, "", ruleCount);
             return res;
         }

@@ -71,6 +71,8 @@ public class FileController {
                     new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
             headers.add("Access-Control-Expose-Headers", "Content-Disposition");
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+
+
             FILE_PATH = ConfigUtil.getStringConfig("file_path");
             InputStream is = file.getInputStream();
             ByteArrayOutputStream os = new ByteArrayOutputStream();
@@ -124,6 +126,7 @@ public class FileController {
      * @param userID
      * @return 测试下载文件
      */
+    @Deprecated
     @GetMapping(value = "/downloadFile", produces = {MediaType.MULTIPART_FORM_DATA_VALUE})
     public ResponseEntity<byte[]> download(@RequestParam String fileName,
                                            @RequestParam String userID) {
