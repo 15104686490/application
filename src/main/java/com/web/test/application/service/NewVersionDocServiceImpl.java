@@ -318,10 +318,17 @@ public class NewVersionDocServiceImpl implements DocService {
                                 }
 
                                 String adviceOfCNName = "";
-                                if ((codeFlag) && (cnFlag)) {
+                                if ((!codeFlag) || (!cnFlag)) {
                                     for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
                                         if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
                                             adviceOfCNName = tempFullRule;
+                                            if(advice.equals("")){
+                                                advice = adviceOfCNName;
+                                            }else {
+                                                if(!advice.contains(adviceOfCNName)) {
+                                                    advice = advice + "\n" + adviceOfCNName;
+                                                }
+                                            }
                                             break;
                                         }
                                     }
@@ -340,12 +347,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                         reason = "标准存在问题，请重点检查标准的编码部分";
                                         reason = reason + "，编码中时间或使用符号存在问题";
                                     } else if (!advice.equals("") && timeError) {
-                                        reason = "标准的名称和编码都存在问题";
+                                        reason = "标准存在问题";
                                         reason = reason + "，其中编码时间或使用符号存在问题";
                                     } else if (codeFlag && (!cnFlag)) {
                                         reason = "标准存在问题，请重点检查标准的名称部分";
                                     } else if (codeFlag && cnFlag) {
-                                        reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
+                                        reason = "标准存在问题，请检查";
                                         if (!adviceOfCNName.equals("")) {
                                             reason = reason + "，可参考标准：" + adviceOfCNName;
                                         }
@@ -536,10 +543,17 @@ public class NewVersionDocServiceImpl implements DocService {
                                             }
 
                                             String adviceOfCNName = "";
-                                            if ((codeFlag) && (cnFlag)) {
+                                            if ((!codeFlag) || (!cnFlag)) {
                                                 for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
                                                     if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
                                                         adviceOfCNName = tempFullRule;
+                                                        if(advice.equals("")){
+                                                            advice = adviceOfCNName;
+                                                        }else {
+                                                            if(!advice.contains(adviceOfCNName)) {
+                                                                advice = advice + "\n" + adviceOfCNName;
+                                                            }
+                                                        }
                                                         break;
                                                     }
                                                 }
@@ -551,19 +565,19 @@ public class NewVersionDocServiceImpl implements DocService {
                                             } else if ((!codeFlag) && (cnFlag)) {
                                                 reason = "标准存在问题，请重点检查标准的编码部分";
                                                 if (timeError) {
-                                                    reason = reason + "，标准编码中时间或使用符号存在问题";
+                                                    reason = reason + "，编码中时间或使用符号存在问题";
                                                 }
                                             } else {
                                                 if (!advice.equals("") && timeError && cnFlag) {
                                                     reason = "标准存在问题，请重点检查标准的编码部分";
                                                     reason = reason + "，编码中时间或使用符号存在问题";
-                                                } else if (!advice.equals("") && timeError && !cnFlag) {
-                                                    reason = "标准的名称和编码都存在问题";
+                                                } else if (!advice.equals("") && timeError) {
+                                                    reason = "标准存在问题";
                                                     reason = reason + "，其中编码时间或使用符号存在问题";
                                                 } else if (codeFlag && (!cnFlag)) {
                                                     reason = "标准存在问题，请重点检查标准的名称部分";
                                                 } else if (codeFlag && cnFlag) {
-                                                    reason = "标准存在问题，标准的名称和编码存在匹配问题，请检查";
+                                                    reason = "标准存在问题，请检查";
                                                     if (!adviceOfCNName.equals("")) {
                                                         reason = reason + "，可参考标准：" + adviceOfCNName;
                                                     }

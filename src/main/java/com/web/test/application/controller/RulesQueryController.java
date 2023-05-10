@@ -127,6 +127,16 @@ public class RulesQueryController {
         }
     }
 
+    /**
+     * @param code
+     * @return
+     * 利用标准编码查询相应标准信息
+     */
+    @GetMapping("/queryRuleByCode")
+    public ResultTest queryRuleByCode(@RequestParam String code){
+        return rulesService.queryRuleByCode(code);
+    }
+
 
     @PostMapping("/postMethod")
     public String testPostMothod() {

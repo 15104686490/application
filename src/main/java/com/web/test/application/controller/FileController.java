@@ -2,6 +2,9 @@ package com.web.test.application.controller;
 
 
 import com.web.test.application.config.ConfigUtil;
+import com.web.test.application.model.UploadDocumentQuery;
+import com.web.test.application.other.PageQuery;
+import com.web.test.application.other.ResultTest;
 import com.web.test.application.service.FileService;
 import com.web.test.application.service.NewVersionDocServiceImpl;
 
@@ -80,6 +83,9 @@ public class FileController {
             byte[] bytes = os.toByteArray();
             log.error(file.getOriginalFilename()); //原始文件名称  包括后缀
             String originalFilename = file.getOriginalFilename();
+            // originalFilename = originalFilename.replaceAll()
+            originalFilename = originalFilename.replaceAll("\\\\", "");
+            originalFilename = originalFilename.replaceAll(":", "");
             String tempFileName = DigestUtils.md5Hex(originalFilename) + System.currentTimeMillis()
                     + originalFilename.substring(originalFilename.lastIndexOf("."));
             String deleteFileName = fileService.storeFile(bytes, tempFileName);
@@ -118,6 +124,12 @@ public class FileController {
             e.printStackTrace();
             return new ResponseEntity<>(null, headers, HttpStatus.INTERNAL_SERVER_ERROR); //500
         }
+    }
+
+
+    @PostMapping(value = "/uploadDocument")
+    public ResultTest uploadDocument(@RequestBody UploadDocumentQuery uploadDocumentQuery) {
+        return rulesService.uploadDocument(uploadDocumentQuery);
     }
 
 
@@ -178,5 +190,12 @@ public class FileController {
     public List getFilesList(@RequestParam("userNumber") String userNumber) {
         return rulesService.getCommonRulePart();
     }
+
+    @Deprecated
+    @GetMapping("/testSaveFile")
+    public void testSaveFile() {
+        fileService.storeFile(new byte[100], "test.pdf");
+    }
+
 
 }

@@ -1,25 +1,34 @@
 package com.web.test.application.service;
 
 import com.alibaba.nacos.common.utils.ConcurrentHashSet;
+import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.dao.BaseMapper;
 import com.web.test.application.model.CollectRuleSingleton;
 import com.web.test.application.model.RuleSingleton;
+import com.web.test.application.model.UploadDocumentQuery;
 import com.web.test.application.other.PageQuery;
 import com.web.test.application.other.PageResult;
+import com.web.test.application.other.ResultTest;
 import jxl.Sheet;
 import jxl.Workbook;
 import jxl.read.biff.BiffException;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.codec.digest.DigestUtils;
 import org.apache.pdfbox.pdmodel.PDDocument;
 import org.apache.pdfbox.text.PDFTextStripper;
 import org.apache.poi.ooxml.POIXMLDocument;
 import org.apache.poi.xwpf.extractor.XWPFWordExtractor;
 import org.apache.poi.xwpf.usermodel.*;
+import org.apache.tomcat.util.http.fileupload.IOUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.logging.LoggingSystem;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -33,6 +42,9 @@ import java.util.stream.Collectors;
 public class RulesService {
     @Autowired
     BaseMapper baseMapper;
+
+    @Autowired
+    private FileService fileService;
 
     /**
      * 存储定时扫表获取的规则
@@ -412,7 +424,12 @@ public class RulesService {
         if (types.size() == 1 && types.get(0).equals("all")) {
             for (RuleSingleton ruleSingleton : ruleSingletonsList) {
                 if (ruleSingleton.getFullName().contains(name.replaceAll(" ", ""))) {
-                    String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    String tempName = "";
+                    if (!ruleSingleton.getCnName().startsWith("《")) {
+                        tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    } else {
+                        tempName = ruleSingleton.getCnName() + "（" + ruleSingleton.getFullCode() + "）";
+                    }
                     ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
                 }
@@ -420,7 +437,12 @@ public class RulesService {
         } else if (types.size() >= 1) {
             for (RuleSingleton ruleSingleton : ruleSingletonsList) {
                 if (ruleSingleton.getFullName().contains(name.replaceAll(" ", "")) && types.contains(ruleSingleton.getType())) {
-                    String tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    String tempName = "";
+                    if (!ruleSingleton.getCnName().startsWith("《")) {
+                        tempName = "《" + ruleSingleton.getCnName() + "》" + "（" + ruleSingleton.getFullCode() + "）";
+                    } else {
+                        tempName = ruleSingleton.getCnName() + "（" + ruleSingleton.getFullCode() + "）";
+                    }
                     ruleSingleton.setFullName(tempName);
                     list.add(ruleSingleton);
                 }
@@ -583,6 +605,87 @@ public class RulesService {
             return res;
         }
 
+    }
+
+    public ResultTest queryRuleByCode(String code) {
+        if (code == null || code.length() == 0) {
+            return new ResultTest(null, 400, "code为null，查询失败");
+        }
+        List<RuleSingleton> ruleSingletons = new ArrayList<>();
+        try {
+            ruleSingletons = baseMapper.queryRuleByCode(code);
+            return new ResultTest(ruleSingletons.get(0), 200, "查询成功");
+        } catch (Exception e) {
+            // throw new RuntimeException(e);
+            log.error("通过code查询rule异常： " + e.getMessage());
+            return new ResultTest(null, 500, "通过code查询rule异常: " + e.getMessage());
+        }
+
+    }
+
+    public ResultTest uploadDocument(UploadDocumentQuery uploadDocumentQuery) {
+        String code = uploadDocumentQuery.getCode();
+        String cnName = uploadDocumentQuery.getCnName();
+        MultipartFile file = uploadDocumentQuery.getFile();
+        byte[] bytesOfFile = new byte[0];
+        if (code == null || code.length() == 0) {
+            return new ResultTest(null, 400, "标准code为空，上传文档失败");
+        }
+        if (file.getSize() == 0) {
+            return new ResultTest(null, 400, "上传文档的大小为0，上传失败");
+        }
+        List<RuleSingleton> ruleSingletons = checkRuleExistByCode(code);
+        if (ruleSingletons.size() == 0) {
+            return new ResultTest(null, 400, "标准不存在，上传文档失败");
+        } else {
+            try {
+                String commonUrl = "";
+                String originalFilename = file.getOriginalFilename();
+                String saveDocPath = ConfigUtil.getStringConfig("save_doc_path");
+                String docServerCommenURL = ConfigUtil.getStringConfig("doc_server_commen_url");
+                String suffix = originalFilename.substring(originalFilename.lastIndexOf("."));
+                String newFileName = DigestUtils.md5Hex(cnName + code);
+                String originalUrl = ruleSingletons.get(0).getDocumentURL();
+                docServerCommenURL = docServerCommenURL + newFileName + suffix;
+                bytesOfFile = getByteArray(file);
+                if (originalUrl == null || originalUrl.length() == 0) {
+                    fileService.storeFileWithFileName(bytesOfFile, saveDocPath, newFileName + suffix);
+                } else {
+                    File deleteFile = new File(saveDocPath + newFileName + suffix);
+                    deleteFile.delete();
+                    fileService.storeFileWithFileName(bytesOfFile, saveDocPath, newFileName + suffix);
+                }
+                baseMapper.updateURLOfRule(docServerCommenURL, code);
+            } catch (Exception e) {
+                /*throw new RuntimeException(e);*/
+                log.error("更新标准URL异常，标准编号： " + code + ",异常信息：" + e.getMessage());
+                return new ResultTest(null, 500, "更新标准URL异常，标准编号： " + code + ",异常信息：" + e.getMessage());
+            }
+        }
+        return new ResultTest(null, 200, "更新标准url成功，标准编号： " + code);
+    }
+
+    public List<RuleSingleton> checkRuleExistByCode(String code) {
+        List<RuleSingleton> ruleSingletons = baseMapper.queryRuleByCode(code);
+        return ruleSingletons;
+    }
+
+    public byte[] getByteArray(MultipartFile file) {
+        HttpHeaders headers = new HttpHeaders();
+        byte[] bytes = new byte[0];
+        try {
+            headers.setContentDispositionFormData("attachment",
+                    new String(file.getName().getBytes(StandardCharsets.UTF_8), "iso-8859-1"));
+            headers.add("Access-Control-Expose-Headers", "Content-Disposition");
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            InputStream is = file.getInputStream();
+            ByteArrayOutputStream os = new ByteArrayOutputStream();
+            IOUtils.copy(is, os);
+            bytes = os.toByteArray();
+        } catch (IOException e) {
+            throw new RuntimeException(e);
+        }
+        return bytes;
     }
 
 

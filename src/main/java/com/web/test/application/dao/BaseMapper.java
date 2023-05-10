@@ -27,6 +27,12 @@ public interface BaseMapper {
     @Select("select cn_name, full_code, full_name, rule_type from full_rules")
     public List<RuleSingleton> queryRulesListWithType();
 
+    @Select("select cn_name, full_code, full_name, rule_type, document_url from full_rules where full_code = #{code}")
+    public List<RuleSingleton> queryRuleByCode(String code);
+
+    @Update("update full_rules set document_url = #{url} where full_code = #{code}")
+    public int updateURLOfRule(String url, String code);
+
     @Insert({"insert into full_rules(cn_name, full_name, full_code, rule_type) values(#{cnName}, #{fullName}, #{fullCode}, #{type})"})
     public int add(RuleSingleton ruleSingleton);
 

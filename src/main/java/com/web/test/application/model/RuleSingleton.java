@@ -39,4 +39,16 @@ public class RuleSingleton {
      */
     String type;
 
+
+    /**
+     * 标准文档地址
+     */
+    String documentURL;
+
+    public RuleSingleton(String cnName, String fullCode, String fullName, String type) {
+        this.cnName = cnName;
+        this.fullCode = fullCode;
+        this.fullName = fullName;
+        this.type = type;
+    }
 }

@@ -20,6 +20,7 @@ public class DocTest {
      */
     public static void main(String[] args) {
         try {
+
             // 2007及以后的版本
             XWPFWordExtractor docx = new XWPFWordExtractor(POIXMLDocument
                     .openPackage("C:\\Users\\dell\\IdeaProjects\\doc-test\\doc-test\\src\\main\\java\\test\\test2.docx"));

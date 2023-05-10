@@ -10,5 +10,6 @@ public class Md5Test {
         /*String str = DigestUtils.md5Hex("admin" + "fileName") + System.currentTimeMillis();
         System.out.println(str);*/
         System.out.println(DigestUtils.md5Hex(""));
+
     }
 }

@@ -122,6 +122,12 @@
 
         </dependency>
 
+        <!-- https://mvnrepository.com/artifact/com.alibaba.boot/nacos-config-spring-boot-starter -->
+        <dependency>
+            <groupId>com.alibaba.boot</groupId>
+            <artifactId>nacos-config-spring-boot-starter</artifactId>
+            <version>0.2.12</version>
+        </dependency>
 
 
         <!-- https://mvnrepository.com/artifact/com.alibaba.nacos/nacos-client -->
@@ -175,7 +181,6 @@
         </dependency>
 
 
-
         <!-- https://mvnrepository.com/artifact/com.github.pagehelper/pagehelper-spring-boot-starter -->
         <dependency>
             <groupId>com.github.pagehelper</groupId>
@@ -189,15 +194,6 @@
             <artifactId>jxl</artifactId>
             <version>2.6.10</version>
         </dependency>
-
-
-
-
-
-
-
-
-
 
     </dependencies>
 
