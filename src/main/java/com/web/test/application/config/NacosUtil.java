@@ -22,7 +22,7 @@ public class NacosUtil {
         log.info("nacos client is initializing");
         Properties properties = new Properties();
         //nocas 配置中心地址
-        properties.setProperty(PropertyKeyConst.SERVER_ADDR, "localhost:8848");
+        properties.setProperty(PropertyKeyConst.SERVER_ADDR, "192.168.196.220:8848");
         try {
             configService = NacosFactory.createConfigService(properties);
             log.info("nacos client initializated successful");

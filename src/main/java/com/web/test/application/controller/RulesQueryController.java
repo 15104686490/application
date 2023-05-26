@@ -155,6 +155,20 @@ public class RulesQueryController {
         return "ok!!";
     }
 
+    @GetMapping("/insertExpireRules")
+    public String insertExpireRules(@RequestParam String type) {
+        // log.error("test post method...");
+        /*if(type == null|| type.isEmpty()){
+            type = "待分类";
+        }*/
+        rulesService.getDataFromExpireExcel("C:\\updateExpireExcel\\update.xls");
+        return "ok!!";
+    }
+
+
+
+
+
 
     @GetMapping("/TxtFileMethod")
     public String txtFileMothod() {

@@ -4,10 +4,7 @@ package com.web.test.application.dao;
 // import org.apache.ibatis.annotations.Mapper;
 // import org.apache.ibatis.annotations.Select;
 
-import com.web.test.application.model.CollectRuleSingleton;
-import com.web.test.application.model.CommentSingleton;
-import com.web.test.application.model.RuleSingleton;
-import com.web.test.application.model.UserSingleton;
+import com.web.test.application.model.*;
 import org.apache.ibatis.annotations.Insert;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Select;
@@ -36,6 +33,9 @@ public interface BaseMapper {
     @Insert({"insert into full_rules(cn_name, full_name, full_code, rule_type) values(#{cnName}, #{fullName}, #{fullCode}, #{type})"})
     public int add(RuleSingleton ruleSingleton);
 
+    @Insert({"insert into expire_rules(cn_name, full_name, full_code) values(#{cnName}, #{fullName}, #{fullCode})"})
+    public int addExpire(ExpireRuleSingleton expireRuleSingleton);
+
     @Select("select distinct rule_type from full_rules;")
     public List<String> queryTypes();
 
@@ -54,6 +54,9 @@ public interface BaseMapper {
 
     @Select("select user_name, password, mail_address from user where user_name = #{userName}")
     public List<UserSingleton> queryUsersByUserName(String userName);
+
+    @Select("select cn_name, full_name, full_code from expire_rules where full_code = #{code}")
+    public List<ExpireRuleSingleton> queryExpireRules(String code);
 
     @Update("update user set password = #{password}, update_time = CURRENT_TIMESTAMP where user_name = #{userName}")
     public int updatePassword(String userName, String password);

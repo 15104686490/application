@@ -351,7 +351,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                         reason = reason + "，其中编码时间或使用符号存在问题";
                                     } else if (codeFlag && (!cnFlag)) {
                                         reason = "标准存在问题，请重点检查标准的名称部分";
-                                    } else if (codeFlag && cnFlag) {
+                                    } else if (codeFlag && cnFlag) { // check
                                         reason = "标准存在问题，请检查";
                                         if (!adviceOfCNName.equals("")) {
                                             reason = reason + "，可参考标准：" + adviceOfCNName;

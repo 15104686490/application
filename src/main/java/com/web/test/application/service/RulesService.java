@@ -4,6 +4,7 @@ import com.alibaba.nacos.common.utils.ConcurrentHashSet;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.dao.BaseMapper;
 import com.web.test.application.model.CollectRuleSingleton;
+import com.web.test.application.model.ExpireRuleSingleton;
 import com.web.test.application.model.RuleSingleton;
 import com.web.test.application.model.UploadDocumentQuery;
 import com.web.test.application.other.PageQuery;
@@ -561,6 +562,78 @@ public class RulesService {
         // List<RuleSingleton> res = new ArrayList<>();
         list.forEach(l -> {
             baseMapper.add(l);
+            System.out.println(l.toString());
+        });
+        workbook.close();
+    }
+
+
+    public void getDataFromExpireExcel(String path) {
+        //创建文件
+        // File xlsFile = new File("C:\\Users\\lzy15\\Desktop\\规范查询\\标准名称添加汇总.xls");
+        HashSet<String> set = new HashSet<>();
+        HashMap<String, String> map = new HashMap<>();
+        /*HashMap<String, RuleSingleton> ruleTemp = new HashMap<>();
+        RULES_MAP.forEach((k, v) -> {
+            ruleTemp.put(v.getFullCode().replaceAll(" ", ""), v);
+        });*/
+        File xlsFile = new File(path);
+        // 获得工作簿对象
+        Workbook workbook = null;
+        try {
+            workbook = Workbook.getWorkbook(xlsFile);
+        } catch (IOException e) {
+            e.printStackTrace();
+        } catch (BiffException e) {
+            e.printStackTrace();
+        }
+        // 获得所有工作表
+        Sheet[] sheets = workbook.getSheets();
+        // 遍历工作表
+        if (sheets != null) {
+            for (Sheet sheet : sheets) {
+                // 获得行数
+                int rows = sheet.getRows();
+                // 获得列数
+                int cols = sheet.getColumns();
+                // 读取数据
+                for (int row = 1; row < rows; row++) {
+                    String name = "";
+                    String code = "";
+                    for (int col = 1; col < 3; col++) {
+                        /*System.out.printf(sheet.getCell(col, row)
+                                .getContents().replaceAll(" ","") +" ");*/
+                        if (col == 2) {
+                            code = sheet.getCell(col, row).getContents().replaceAll(" ", "");
+                        } else {
+                            name = sheet.getCell(col, row).getContents().replaceAll(" ", "");
+                        }
+                    }
+                    if (set.add(code)) {
+                        map.put(code, name);
+                    }
+                    //System.out.println();
+                }
+            }
+        }
+        List<ExpireRuleSingleton> list = new ArrayList<>();
+        map.forEach((k, v) -> {
+            // String type = "风电";
+            //String type = typeName;
+            /*if (ruleTemp.get(k) != null) {
+                type = ruleTemp.get(k).getType();
+            }*/
+            List<ExpireRuleSingleton> expireRuleSingletonList = baseMapper.queryExpireRules(k);
+            ExpireRuleSingleton temp = new ExpireRuleSingleton(v, k, "《" + v + "》" + "（" + k + "）");
+            ExpireRuleSingleton temp1 = new ExpireRuleSingleton(v, k, "《" + v + "（" + k + "）" + "》");
+            if (expireRuleSingletonList.size() == 0) {
+                list.add(temp);
+                list.add(temp1);
+            }
+        });
+        // List<RuleSingleton> res = new ArrayList<>();
+        list.forEach(l -> {
+            baseMapper.addExpire(l);
             System.out.println(l.toString());
         });
         workbook.close();
