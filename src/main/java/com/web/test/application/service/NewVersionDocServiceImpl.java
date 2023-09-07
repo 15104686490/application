@@ -251,6 +251,8 @@ public class NewVersionDocServiceImpl implements DocService {
                             String temp = matcher.group();
                             String onlyStringTemp = temp;
                             onlyStringTemp = replaceSpecialSymbol(onlyStringTemp, symbols, "");
+
+
                             /*处理完整的标准*/
                             if (!rulesService.queryFullNameList().contains(onlyStringTemp)) {
                                 i++;
@@ -322,10 +324,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                     for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
                                         if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
                                             adviceOfCNName = tempFullRule;
-                                            if(advice.equals("")){
+                                            if (advice.equals("")) {
                                                 advice = adviceOfCNName;
-                                            }else {
-                                                if(!advice.contains(adviceOfCNName)) {
+                                            } else {
+                                                if (!advice.contains(adviceOfCNName)) {
                                                     advice = advice + "\n" + adviceOfCNName;
                                                 }
                                             }
@@ -385,10 +387,18 @@ public class NewVersionDocServiceImpl implements DocService {
                                 String temp = matcher.group();
                                 String onlyCode = temp;
                                 onlyCode = replaceSpecialSymbol(onlyCode, symbols, "");
-                                //此处暂时省略对照先验证提取
+
+
                                 if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
+                                    //String tTypeString = getTString(onlyCode);
+                                    //if (!rulesService.queryFullCodesSet().contains(tTypeString)) {
                                     String md5OfTemp = getMd5OfString(temp);
                                     String adviceCode = "";
+
+                                    String tTypeString = getTString(onlyCode);
+                                    if (rulesService.queryFullCodesSet().contains(tTypeString)) {
+                                        adviceCode = tTypeString;
+                                    }
                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                         String startOfFullCode = getStartOfCode(fullCode);
                                         String startOfOnlyCode = getStartOfCode(onlyCode);
@@ -398,6 +408,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                             adviceCode = fullCode;
                                         }
                                     }
+
                                     String advice = "";
                                     if (!adviceCode.equals("")) {
                                         for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
@@ -421,6 +432,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                         resultSingletonList.add(singleton);
                                         resultList.add(temp);
                                     }
+                                    // }
                                 }
                                 f = true;
                                 codeFlag = true;
@@ -547,10 +559,10 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
                                                     if ((!adviceCNName.equals("")) && tempFullRule.contains(adviceCNName)) {
                                                         adviceOfCNName = tempFullRule;
-                                                        if(advice.equals("")){
+                                                        if (advice.equals("")) {
                                                             advice = adviceOfCNName;
-                                                        }else {
-                                                            if(!advice.contains(adviceOfCNName)) {
+                                                        } else {
+                                                            if (!advice.contains(adviceOfCNName)) {
                                                                 advice = advice + "\n" + adviceOfCNName;
                                                             }
                                                         }
@@ -612,11 +624,17 @@ public class NewVersionDocServiceImpl implements DocService {
                                             onlyCode = replaceSpecialSymbol(onlyCode, symbols, "");
                                             //此处暂时省略对照先验证提取
                                             if (!rulesService.queryFullCodesSet().contains(onlyCode)) {
-
+                                                //String tTypeString = getTString(onlyCode);
+                                                //if (!rulesService.queryFullCodesSet().contains(tTypeString)) {
 
                                                 String md5OfTemp = getMd5OfString(temp);
                                                 paragraphResult.put(md5OfTemp, temp);
                                                 String adviceCode = "";
+
+                                                String tTypeString = getTString(onlyCode);
+                                                if (rulesService.queryFullCodesSet().contains(tTypeString)) {
+                                                    adviceCode = tTypeString;
+                                                }
                                                 //int maxLength = 0;
                                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                                     String startOfFullCode = getStartOfCode(fullCode);
@@ -650,7 +668,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                                     resultSingletonList.add(singleton);
                                                 }
-
+                                                //}
                                             }
                                             f = true;
                                             codeFlag = true;
@@ -871,5 +889,31 @@ public class NewVersionDocServiceImpl implements DocService {
         }
 
 
+    }
+
+    public String getTString(String str) {
+        StringBuffer sb = new StringBuffer();
+        StringBuffer sb2 = new StringBuffer();
+        char[] strs = str.toCharArray();
+        if (str.contains("/T")) {
+            String temp = str.replace("/T", "");
+            //System.out.println(temp);
+            return temp;
+
+        } else if (str.contains("/")) {
+            return str;
+        } else {
+            for (char c : strs) {
+                if (Character.isLetter(c) || c == '/') {
+                    sb.append(c);
+                } else {
+                    sb2.append(c);
+                }
+            }
+            /*System.out.println(sb);
+            System.out.println(sb2);*/
+            // System.out.println(sb + "/T" + sb2);
+            return sb + "/T" + sb2;
+        }
     }
 }
