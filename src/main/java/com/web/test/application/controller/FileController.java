@@ -109,7 +109,7 @@ public class FileController {
             deleteFile.delete();
             tempFile.delete();
 
-            return new ResponseEntity<>(content, headers, HttpStatus.OK); //200
+            return new ResponseEntity<>(content, headers, HttpStatus.OK ); //200
         } catch (Exception e) {
             log.error("上传文件处理异常：" + e.getStackTrace());
             e.printStackTrace();
