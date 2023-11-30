@@ -395,6 +395,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                     String md5OfTemp = getMd5OfString(temp);
                                     String adviceCode = "";
 
+                                    //  /T等后缀问题
                                     String tTypeString = getTString(onlyCode);
                                     if (rulesService.queryFullCodesSet().contains(tTypeString)) {
                                         adviceCode = tTypeString;
@@ -406,6 +407,20 @@ public class NewVersionDocServiceImpl implements DocService {
                                         if (adviceCode.equals("") && (!startOfFullCode.equals("*") && !startOfOnlyCode.equals("*"))
                                                 && startOfOnlyCode.equals(startOfFullCode)) {
                                             adviceCode = fullCode;
+                                        }
+                                    }
+
+                                    // 尝试去除时间后 调整/后缀 扩大搜索查询建议code的范围
+                                    if(adviceCode.equals("")){
+                                        for (String fullCode : rulesService.queryFullCodesSet()) {
+                                            String startOfFullCode = getStartOfCode(fullCode);
+                                            String startOfOnlyCode = getStartOfCode(onlyCode);
+                                            String tType = getTString(startOfOnlyCode);
+                                            // log.error(startOfOnlyCode);
+                                            if (adviceCode.equals("") && (!startOfFullCode.equals("*") && !startOfOnlyCode.equals("*"))
+                                                    && tType.equals(startOfFullCode)) {
+                                                adviceCode = fullCode;
+                                            }
                                         }
                                     }
 
@@ -645,6 +660,21 @@ public class NewVersionDocServiceImpl implements DocService {
                                                         adviceCode = fullCode;
                                                     }
                                                 }
+
+                                                // 尝试去除时间后 调整/后缀 扩大搜索查询建议code的范围
+                                                if(adviceCode.equals("")){
+                                                    for (String fullCode : rulesService.queryFullCodesSet()) {
+                                                        String startOfFullCode = getStartOfCode(fullCode);
+                                                        String startOfOnlyCode = getStartOfCode(onlyCode);
+                                                        String tType = getTString(startOfOnlyCode);
+                                                        // log.error(startOfOnlyCode);
+                                                        if (adviceCode.equals("") && (!startOfFullCode.equals("*") && !startOfOnlyCode.equals("*"))
+                                                                && tType.equals(startOfFullCode)) {
+                                                            adviceCode = fullCode;
+                                                        }
+                                                    }
+                                                }
+
                                                 String advice = "";
                                                 if (!adviceCode.equals("")) {
                                                     for (String tempFullRule : rulesService.queryFullNameListWithSymbol()) {
