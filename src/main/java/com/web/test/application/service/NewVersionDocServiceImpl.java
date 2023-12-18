@@ -272,6 +272,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                 String onlyCode = "";
                                 onlyString = replaceSpecialSymbol(onlyString, symbols, "");
                                 String adviceCode = "";
+
                                 for (String fullCode : rulesService.queryFullCodesSet()) {
                                     //String startOfCode = getStartOfCode(fullCode);
                                     if (onlyString.contains(fullCode)) {
@@ -360,8 +361,11 @@ public class NewVersionDocServiceImpl implements DocService {
                                         }
                                     } else {
                                         reason = "标准存在问题请检查，当前库中未检索到此标准";
+                                        continue;
                                     }
                                 }
+
+
                                 if (!advice.equals("")) {
                                     reason = reason + "，可参考标准：" + advice;
                                 }
@@ -411,7 +415,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                     }
 
                                     // 尝试去除时间后 调整/后缀 扩大搜索查询建议code的范围
-                                    if(adviceCode.equals("")){
+                                    if (adviceCode.equals("")) {
                                         for (String fullCode : rulesService.queryFullCodesSet()) {
                                             String startOfFullCode = getStartOfCode(fullCode);
                                             String startOfOnlyCode = getStartOfCode(onlyCode);
@@ -441,7 +445,12 @@ public class NewVersionDocServiceImpl implements DocService {
                                         if (!advice.equals("")) {
                                             reason = reason + "，可参考标准：" + advice;
                                         } else {
-                                            reason = reason + "，且未在当前系统库中查找到相似的标准。";
+                                            //rulesService.queryExpireFullCodeSet();
+                                            if (rulesService.queryExpireFullCodeSet().contains(onlyCode)) {
+                                                reason =  "当前引用的标准已作废或废止请检查。";
+                                            } else {
+                                                reason = reason + "，且未在当前系统库中查找到相似的标准。";
+                                            }
                                         }
                                         CheckResultSingleton singleton = new CheckResultSingleton(temp, reason, md5OfTemp);
                                         resultSingletonList.add(singleton);
@@ -610,6 +619,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                                     }
                                                 } else {
                                                     reason = "标准存在问题请检查，当前库中未检索到此标准";
+                                                    continue;
                                                 }
                                             }
                                             if (!advice.equals("")) {
@@ -662,7 +672,7 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 }
 
                                                 // 尝试去除时间后 调整/后缀 扩大搜索查询建议code的范围
-                                                if(adviceCode.equals("")){
+                                                if (adviceCode.equals("")) {
                                                     for (String fullCode : rulesService.queryFullCodesSet()) {
                                                         String startOfFullCode = getStartOfCode(fullCode);
                                                         String startOfOnlyCode = getStartOfCode(onlyCode);
@@ -691,7 +701,11 @@ public class NewVersionDocServiceImpl implements DocService {
                                                 if (!advice.equals("")) {
                                                     reason = reason + "，可参考标准：" + advice;
                                                 } else {
-                                                    reason = reason + "，且未在当前系统库中查找到相似的标准。";
+                                                    if (rulesService.queryExpireFullCodeSet().contains(onlyCode)) {
+                                                        reason =  "当前引用的标准已作废或废止请检查。";
+                                                    } else {
+                                                        reason = reason + "，且未在当前系统库中查找到相似的标准。";
+                                                    }
                                                 }
                                                 if (totalResult.add(temp)) {
                                                     resultList.add(temp);

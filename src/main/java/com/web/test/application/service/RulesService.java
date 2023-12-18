@@ -61,6 +61,12 @@ public class RulesService {
 
     static ConcurrentMap<String, CollectRuleSingleton> DATA_BASE_COLLECT_RULES_MAP = new ConcurrentHashMap<>();
 
+
+    /**
+     * 存储收集的过期标准，对检测出的存在问题的标准进行进一步的分类和提示
+     */
+    static ConcurrentMap<String, ExpireRuleSingleton> EXPIRE_RULES_MAP = new ConcurrentHashMap<>();
+
     public List<String> queryFullNameList() {
         Set<String> hashSet = RULES_MAP.keySet();
         List<String> res = new ArrayList<>();
@@ -114,6 +120,19 @@ public class RulesService {
         return hashSet;
     }
 
+    public Set<String> queryExpireFullCodeSet() {
+        Set<String> hashSet = new HashSet<>();
+        EXPIRE_RULES_MAP.forEach((s, r) -> {
+            String temp = r.getFullCode().replaceAll(" ", "");
+            temp.replaceAll("（", "");
+            temp.replaceAll("）", "");
+            temp.replaceAll("《", "");
+            temp.replaceAll("》", "");
+            hashSet.add(temp);
+        });
+        return hashSet;
+    }
+
 
     public static ConcurrentMap getRulesMap() {
         return RULES_MAP;
@@ -121,6 +140,10 @@ public class RulesService {
 
     public static void setRulesMap(ConcurrentMap<String, RuleSingleton> newMap) {
         RULES_MAP = newMap;
+    }
+
+    public static void setExpireRulesMap(ConcurrentMap<String, ExpireRuleSingleton> newMap) {
+        EXPIRE_RULES_MAP = newMap;
     }
 
     /*public void insertRules() {
@@ -573,6 +596,7 @@ public class RulesService {
         // File xlsFile = new File("C:\\Users\\lzy15\\Desktop\\规范查询\\标准名称添加汇总.xls");
         HashSet<String> set = new HashSet<>();
         HashMap<String, String> map = new HashMap<>();
+        int deleteNums = 0;
         /*HashMap<String, RuleSingleton> ruleTemp = new HashMap<>();
         RULES_MAP.forEach((k, v) -> {
             ruleTemp.put(v.getFullCode().replaceAll(" ", ""), v);
@@ -634,6 +658,10 @@ public class RulesService {
         // List<RuleSingleton> res = new ArrayList<>();
         list.forEach(l -> {
             baseMapper.addExpire(l);
+            int num = baseMapper.deleteFullRule(l.getFullCode());
+            if (num != 0) {
+                log.error("删除作废或废止的标准" + l.getFullCode() + ",条数为：" + num);
+            }
             System.out.println(l.toString());
         });
         workbook.close();

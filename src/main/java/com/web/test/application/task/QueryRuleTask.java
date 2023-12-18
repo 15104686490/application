@@ -4,6 +4,7 @@ import com.alibaba.nacos.api.config.annotation.NacosValue;
 import com.web.test.application.config.ConfigUtil;
 import com.web.test.application.dao.BaseMapper;
 import com.web.test.application.model.CollectRuleSingleton;
+import com.web.test.application.model.ExpireRuleSingleton;
 import com.web.test.application.model.RuleSingleton;
 import com.web.test.application.service.RulesService;
 import lombok.extern.slf4j.Slf4j;
@@ -58,7 +59,7 @@ public class QueryRuleTask {
                     tempMap.put(r.getFullName(), r);
                 });
                 RulesService.setRulesMap(tempMap);
-                if(!RulesService.getRulesMap().isEmpty()) {
+                if (!RulesService.getRulesMap().isEmpty()) {
                     RULES_FLAG = true;
                 }
             } catch (Exception e) {
@@ -67,6 +68,32 @@ public class QueryRuleTask {
             }
         } else {
             log.error("Map暂停更新");
+        }
+    }
+
+    @Scheduled(cron = "0 */3 * * * ?")
+    public void updateExpireRulesMap() {
+        boolean executeFlag = true;
+        executeFlag = ConfigUtil.getBooleanConfig("execute_expire_flag");
+
+        if (executeFlag) {
+            try {
+                log.error("更新过期规范Map");
+                List<ExpireRuleSingleton> list = baseMapper.queryExpireRulesList();
+                ConcurrentMap<String, ExpireRuleSingleton> tempMap = new ConcurrentHashMap<>();
+                list.forEach(r -> {
+                    tempMap.put(r.getFullName(), r);
+                });
+                RulesService.setExpireRulesMap(tempMap);
+                if (!RulesService.getRulesMap().isEmpty()) {
+                    RULES_FLAG = true;
+                }
+            } catch (Exception e) {
+                log.error("updateExpireRulesMap 任务执行异常终止");
+                log.error(e.getMessage());
+            }
+        } else {
+            log.error("过期标准Map暂停更新");
         }
     }
 
@@ -122,6 +149,7 @@ public class QueryRuleTask {
                     RulesService.getCollectRulesMap().forEach((k, v) -> {
                         baseMapper.addCollect(v);
                     });
+                    log.error("本次任务共收集问题标准" + RulesService.getCollectRulesMap().size() + "条");
                 }
                 RulesService.clearCollectRulesMap();
             } catch (Exception e) {

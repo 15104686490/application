@@ -5,10 +5,7 @@ package com.web.test.application.dao;
 // import org.apache.ibatis.annotations.Select;
 
 import com.web.test.application.model.*;
-import org.apache.ibatis.annotations.Insert;
-import org.apache.ibatis.annotations.Mapper;
-import org.apache.ibatis.annotations.Select;
-import org.apache.ibatis.annotations.Update;
+import org.apache.ibatis.annotations.*;
 
 import java.util.List;
 
@@ -20,6 +17,12 @@ public interface BaseMapper {
 
     @Select("select cn_name, full_code, full_name, rule_type from full_rules")
     public List<RuleSingleton> queryRulesList();
+
+    @Select("select  cn_name, full_code, full_name from expire_rules")
+    public List<ExpireRuleSingleton> queryExpireRulesList();
+
+    @Delete("delete from full_rules where full_code = #{fullCode} and id >= 0")
+    public int deleteFullRule(String fullCode);
 
     @Select("select cn_name, full_code, full_name, rule_type from full_rules")
     public List<RuleSingleton> queryRulesListWithType();
